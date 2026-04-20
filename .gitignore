@@ -1,0 +1,57 @@
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.so
+*.dylib
+
+# Virtual env
+.venv/
+venv/
+env/
+ENV/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy / pyright
+.mypy_cache/
+.dmypy.json
+pyrightconfig.json
+
+# ── Node / Frontend ──────────────────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.tsbuildinfo
+
+# ── Environment / Secrets ────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# Keep example templates
+!.env.example
+
+# ── OS ───────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── IDE / Tools ──────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.claude/
+
+# ── Docker ───────────────────────────────────────────────────────────────────
+# Keep docker-compose.yml and Dockerfile
+# (postgres data lives in named volume, not here)
