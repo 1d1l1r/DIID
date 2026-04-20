@@ -265,7 +265,7 @@ export function ProfileDetailPage() {
 
   // ─────────────────────────────────────────────────────────────────────────
   return (
-    <div>
+    <div className="max-w-4xl">
       {/* Back */}
       <button onClick={() => navigate('/profiles')} className="flex items-center gap-2 text-zinc-500 hover:text-zinc-200 text-sm mb-4 transition-colors">
         <ArrowLeft size={15} /> {t.profiles.title}
@@ -391,7 +391,7 @@ export function ProfileDetailPage() {
       {tab === 'cards' && (
         <div>
           {showCreate && cardCreateForm}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
             {cards.map(c => <BankCard key={c.id} card={c} onClick={() => navigate(`/cards/${c.id}`)} />)}
             {cards.length === 0 && !showCreate && <p className="text-zinc-600 text-sm">{t.profiles.tab_cards}</p>}
           </div>
