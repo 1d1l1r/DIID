@@ -62,6 +62,7 @@ export interface Document {
   issue_date: string | null
   expiry_date: string | null
   note: string | null
+  file_name: string | null
   created_at: string
   updated_at: string
 }

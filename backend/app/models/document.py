@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import date
 
-from sqlalchemy import Date, Enum as SAEnum, ForeignKey, String, Text
+from sqlalchemy import Column, Date, Enum as SAEnum, ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -33,3 +33,5 @@ class Document(Base, TimestampMixin):
     issue_date: Mapped[date | None] = mapped_column(Date)
     expiry_date: Mapped[date | None] = mapped_column(Date)
     note: Mapped[str | None] = mapped_column(Text)
+    file_name = Column(String(255), nullable=True)
+    file_path = Column(String(512), nullable=True)

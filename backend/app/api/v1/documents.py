@@ -1,6 +1,8 @@
 import uuid
+from pathlib import Path
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, File, HTTPException, Response, UploadFile, status
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_session
@@ -9,6 +11,9 @@ from app.crud.profile import profile_crud
 from app.db.session import get_db
 from app.models.session import Session as DBSession
 from app.schemas.document import DocumentCreate, DocumentOut, DocumentUpdate
+
+UPLOADS_DIR = Path("/app/uploads")
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 router = APIRouter(tags=["documents"])
 
@@ -73,3 +78,54 @@ def delete_document(
 ):
     if not document_crud.delete(db, id=document_id):
         raise HTTPException(status_code=404, detail="Document not found")
+
+
+@router.post("/documents/{document_id}/file", status_code=204)
+async def upload_file(
+    document_id: uuid.UUID,
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    _: DBSession = Depends(get_current_session),
+):
+    if file.content_type != "application/pdf":
+        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    doc = document_crud.get(db, document_id)
+    if not doc:
+        raise HTTPException(status_code=404, detail="Document not found")
+    if doc.file_path:
+        Path(doc.file_path).unlink(missing_ok=True)
+    path = UPLOADS_DIR / f"{document_id}.pdf"
+    contents = await file.read()
+    path.write_bytes(contents)
+    doc.file_name = file.filename
+    doc.file_path = str(path)
+    db.commit()
+    return Response(status_code=204)
+
+
+@router.get("/documents/{document_id}/file")
+def download_file(
+    document_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _: DBSession = Depends(get_current_session),
+):
+    doc = document_crud.get(db, document_id)
+    if not doc or not doc.file_path:
+        raise HTTPException(status_code=404, detail="File not found")
+    return FileResponse(doc.file_path, filename=doc.file_name, media_type="application/pdf")
+
+
+@router.delete("/documents/{document_id}/file", status_code=204)
+def delete_file(
+    document_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _: DBSession = Depends(get_current_session),
+):
+    doc = document_crud.get(db, document_id)
+    if not doc or not doc.file_path:
+        raise HTTPException(status_code=404, detail="File not found")
+    Path(doc.file_path).unlink(missing_ok=True)
+    doc.file_name = None
+    doc.file_path = None
+    db.commit()
+    return Response(status_code=204)

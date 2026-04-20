@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Trash2, Pencil, Check, X } from 'lucide-react'
+import { ArrowLeft, Trash2, Pencil, Check, X, Paperclip, Download, Upload } from 'lucide-react'
 import { documentsApi } from '../../lib/api/documents'
 import { type Document, type DocumentType } from '../../lib/types'
 import { CopyButton } from '../../components/common/CopyButton'
@@ -44,6 +44,7 @@ export function DocumentDetailPage() {
   const t = useT()
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState<EditForm | null>(null)
+  const [uploadingFile, setUploadingFile] = useState(false)
 
   const { data: doc } = useQuery({ queryKey: ['document', id], queryFn: () => documentsApi.get(id!) })
 
@@ -67,6 +68,34 @@ export function DocumentDetailPage() {
       toast.success(t.documents.ok_saved)
     },
   })
+
+  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (file.type !== 'application/pdf') {
+      toast.error(t.documents.file_only_pdf)
+      return
+    }
+    setUploadingFile(true)
+    try {
+      await documentsApi.uploadFile(doc!.id, file)
+      qc.invalidateQueries({ queryKey: ['document', id] })
+      toast.success(t.documents.file_upload)
+    } catch {
+      toast.error(t.documents.file_only_pdf)
+    } finally {
+      setUploadingFile(false)
+    }
+  }
+
+  const handleDeleteFile = async () => {
+    try {
+      await documentsApi.deleteFile(doc!.id)
+      qc.invalidateQueries({ queryKey: ['document', id] })
+    } catch {
+      // ignore
+    }
+  }
 
   if (!doc) return (
     <div className="flex items-center justify-center py-20">
@@ -243,6 +272,44 @@ export function DocumentDetailPage() {
                 <div className="pt-2 border-t border-zinc-800">
                   <p className="text-xs text-zinc-500 mb-1">{t.common.note}</p>
                   <p className="text-sm text-zinc-400">{doc.note}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Scan / PDF section */}
+            <div className="mt-4 pt-4 border-t border-zinc-800">
+              <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">{t.documents.file_section}</p>
+              {doc.file_name ? (
+                <div className="flex items-center gap-2">
+                  <Paperclip size={14} className="text-zinc-400 flex-shrink-0" />
+                  <span className="text-sm text-zinc-300 flex-1 truncate">{doc.file_name}</span>
+                  <a
+                    href={documentsApi.getFileUrl(doc.id)}
+                    download={doc.file_name}
+                    className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors"
+                  >
+                    <Download size={13} /> {t.documents.file_download}
+                  </a>
+                  <button
+                    onClick={handleDeleteFile}
+                    className="p-1 text-zinc-600 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-zinc-600">{t.documents.file_none}</span>
+                  <label className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer">
+                    <Upload size={13} /> {uploadingFile ? t.documents.file_uploading : t.documents.file_upload}
+                    <input
+                      type="file"
+                      accept="application/pdf"
+                      className="hidden"
+                      onChange={handleUploadFile}
+                      disabled={uploadingFile}
+                    />
+                  </label>
                 </div>
               )}
             </div>

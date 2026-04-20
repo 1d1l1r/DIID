@@ -113,6 +113,13 @@ const en = {
     type_passport: 'Passport',
     type_foreign_passport: 'Foreign Passport',
     type_driver: 'Driver\'s License',
+    file_section: 'Document Scan',
+    file_upload: 'Attach PDF',
+    file_download: 'Download',
+    file_delete: 'Remove file',
+    file_uploading: 'Uploading...',
+    file_none: 'No scan attached',
+    file_only_pdf: 'Only PDF files are supported',
   },
 
   // Cards
@@ -338,6 +345,13 @@ const ru: typeof en = {
     type_passport: 'Паспорт',
     type_foreign_passport: 'Загранпаспорт',
     type_driver: 'Водительское удостоверение',
+    file_section: 'Скан документа',
+    file_upload: 'Прикрепить PDF',
+    file_download: 'Скачать',
+    file_delete: 'Удалить файл',
+    file_uploading: 'Загружаем...',
+    file_none: 'Скан не прикреплён',
+    file_only_pdf: 'Поддерживаются только PDF файлы',
   },
 
   cards: {

@@ -16,4 +16,18 @@ export const documentsApi = {
 
   delete: (id: string): Promise<void> =>
     api.delete(`/documents/${id}`),
+
+  uploadFile: (documentId: string, file: File) => {
+    const form = new FormData()
+    form.append('file', file)
+    return api.post(`/documents/${documentId}/file`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
+
+  getFileUrl: (documentId: string) =>
+    `${api.defaults.baseURL}/documents/${documentId}/file`,
+
+  deleteFile: (documentId: string) =>
+    api.delete(`/documents/${documentId}/file`),
 }

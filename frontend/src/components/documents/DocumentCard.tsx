@@ -1,4 +1,4 @@
-import { FileText } from 'lucide-react'
+import { FileText, Paperclip } from 'lucide-react'
 import type { Document } from '../../lib/types'
 import { CopyButton } from '../common/CopyButton'
 import { FieldReveal } from '../common/FieldReveal'
@@ -50,6 +50,9 @@ export function DocumentCard({ doc, onClick }: DocumentCardProps) {
         </span>
         {doc.country && (
           <span className="text-xs text-zinc-500">{doc.country}</span>
+        )}
+        {doc.file_name && (
+          <Paperclip size={12} className="text-zinc-500 flex-shrink-0" />
         )}
       </div>
 
