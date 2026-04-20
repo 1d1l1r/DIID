@@ -1,10 +1,12 @@
 import { FileText, Paperclip } from 'lucide-react'
-import type { Document } from '../../lib/types'
+import type { Document, DocumentType } from '../../lib/types'
 import { CopyButton } from '../common/CopyButton'
 import { FieldReveal } from '../common/FieldReveal'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
 import { formatDate } from '../../lib/utils'
 import { useT, getDocTypeLabel } from '../../lib/i18n'
+
+const SCAN_TYPES: DocumentType[] = ['scan', 'photo']
 
 const TYPE_STYLES: Record<string, string> = {
   id_card: 'border-l-blue-500 bg-blue-500/5',
@@ -56,15 +58,19 @@ export function DocumentCard({ doc, onClick }: DocumentCardProps) {
         )}
       </div>
 
-      {/* Document number */}
+      {/* Document number OR title for scan types */}
       <div className="flex items-center gap-1.5 mb-2" onClick={e => e.stopPropagation()}>
         <FileText size={13} className="text-zinc-500 flex-shrink-0" />
-        <FieldReveal
-          value={doc.document_number}
-          mode={getMode('documents.document_number')}
-          label={t.documents.doc_number}
-          copyKey={`doc-num-${doc.id}`}
-        />
+        {SCAN_TYPES.includes(doc.type) ? (
+          <span className="text-sm text-zinc-300">{doc.issued_by || '—'}</span>
+        ) : (
+          <FieldReveal
+            value={doc.document_number}
+            mode={getMode('documents.document_number')}
+            label={t.documents.doc_number}
+            copyKey={`doc-num-${doc.id}`}
+          />
+        )}
       </div>
 
       {/* IIN */}

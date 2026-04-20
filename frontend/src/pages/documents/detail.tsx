@@ -9,7 +9,8 @@ import { formatDate } from '../../lib/utils'
 import { useT, getT, getDocTypeLabel } from '../../lib/i18n'
 import toast from 'react-hot-toast'
 
-const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license']
+const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license', 'diploma', 'birth_certificate', 'power_of_attorney', 'scan', 'photo']
+const SCAN_TYPES: DocumentType[] = ['scan', 'photo']
 
 type EditForm = {
   type: DocumentType
@@ -72,7 +73,8 @@ export function DocumentDetailPage() {
   const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.type !== 'application/pdf') {
+    const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png']
+    if (!ACCEPTED.includes(file.type)) {
       toast.error(t.documents.file_only_pdf)
       return
     }
@@ -145,57 +147,70 @@ export function DocumentDetailPage() {
                 <option key={dt} value={dt}>{getDocTypeLabel(t, dt)}</option>
               ))}
             </select>
-            <input
-              value={editForm.country}
-              onChange={e => setEditForm(f => f ? { ...f, country: e.target.value } : f)}
-              placeholder={t.common.country}
-              className={inputCls}
-            />
-            <input
-              value={editForm.document_number}
-              onChange={e => setEditForm(f => f ? { ...f, document_number: e.target.value } : f)}
-              placeholder={t.documents.doc_number}
-              className={inputCls + ' font-mono'}
-            />
-            <input
-              value={editForm.iin}
-              onChange={e => setEditForm(f => f ? { ...f, iin: e.target.value } : f)}
-              placeholder={t.profiles.iin}
-              className={inputCls + ' font-mono'}
-            />
-            <input
-              value={editForm.issued_by}
-              onChange={e => setEditForm(f => f ? { ...f, issued_by: e.target.value } : f)}
-              placeholder={t.documents.issued_by}
-              className={inputCls}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs text-zinc-500 mb-1 block">{t.documents.issued_label}</label>
+
+            {SCAN_TYPES.includes(editForm.type) ? (
+              <input
+                value={editForm.issued_by}
+                onChange={e => setEditForm(f => f ? { ...f, issued_by: e.target.value } : f)}
+                placeholder={t.documents.file_title}
+                className={inputCls}
+              />
+            ) : (
+              <>
                 <input
-                  type="date"
-                  value={editForm.issue_date}
-                  onChange={e => setEditForm(f => f ? { ...f, issue_date: e.target.value } : f)}
+                  value={editForm.country}
+                  onChange={e => setEditForm(f => f ? { ...f, country: e.target.value } : f)}
+                  placeholder={t.common.country}
                   className={inputCls}
                 />
-              </div>
-              <div>
-                <label className="text-xs text-zinc-500 mb-1 block">{t.documents.expires_label}</label>
                 <input
-                  type="date"
-                  value={editForm.expiry_date}
-                  onChange={e => setEditForm(f => f ? { ...f, expiry_date: e.target.value } : f)}
+                  value={editForm.document_number}
+                  onChange={e => setEditForm(f => f ? { ...f, document_number: e.target.value } : f)}
+                  placeholder={t.documents.doc_number}
+                  className={inputCls + ' font-mono'}
+                />
+                <input
+                  value={editForm.iin}
+                  onChange={e => setEditForm(f => f ? { ...f, iin: e.target.value } : f)}
+                  placeholder={t.profiles.iin}
+                  className={inputCls + ' font-mono'}
+                />
+                <input
+                  value={editForm.issued_by}
+                  onChange={e => setEditForm(f => f ? { ...f, issued_by: e.target.value } : f)}
+                  placeholder={t.documents.issued_by}
                   className={inputCls}
                 />
-              </div>
-            </div>
-            <textarea
-              value={editForm.note}
-              onChange={e => setEditForm(f => f ? { ...f, note: e.target.value } : f)}
-              placeholder={t.common.note}
-              rows={2}
-              className={inputCls + ' resize-none'}
-            />
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-xs text-zinc-500 mb-1 block">{t.documents.issued_label}</label>
+                    <input
+                      type="date"
+                      value={editForm.issue_date}
+                      onChange={e => setEditForm(f => f ? { ...f, issue_date: e.target.value } : f)}
+                      className={inputCls}
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs text-zinc-500 mb-1 block">{t.documents.expires_label}</label>
+                    <input
+                      type="date"
+                      value={editForm.expiry_date}
+                      onChange={e => setEditForm(f => f ? { ...f, expiry_date: e.target.value } : f)}
+                      className={inputCls}
+                    />
+                  </div>
+                </div>
+                <textarea
+                  value={editForm.note}
+                  onChange={e => setEditForm(f => f ? { ...f, note: e.target.value } : f)}
+                  placeholder={t.common.note}
+                  rows={2}
+                  className={inputCls + ' resize-none'}
+                />
+              </>
+            )}
+
             <div className="flex items-center gap-2 pt-1">
               <button
                 onClick={saveEdit}
@@ -212,71 +227,87 @@ export function DocumentDetailPage() {
           </div>
         ) : (
           <>
-            <div className="flex items-center gap-2 mb-5">
-              <span className="text-sm font-semibold text-zinc-100">{getDocTypeLabel(t, doc.type)}</span>
-              {doc.country && <span className="text-xs text-zinc-500">{doc.country}</span>}
-              <button onClick={startEdit} className="ml-auto p-1.5 text-zinc-600 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors">
-                <Pencil size={14} />
-              </button>
-            </div>
+            {SCAN_TYPES.includes(doc.type) ? (
+              <>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-sm font-semibold text-zinc-100">{getDocTypeLabel(t, doc.type)}</span>
+                  <button onClick={startEdit} className="ml-auto p-1.5 text-zinc-600 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors">
+                    <Pencil size={14} />
+                  </button>
+                </div>
+                {doc.issued_by && (
+                  <p className="text-zinc-200 text-sm mb-4">{doc.issued_by}</p>
+                )}
+              </>
+            ) : (
+              <>
+                <div className="flex items-center gap-2 mb-5">
+                  <span className="text-sm font-semibold text-zinc-100">{getDocTypeLabel(t, doc.type)}</span>
+                  {doc.country && <span className="text-xs text-zinc-500">{doc.country}</span>}
+                  <button onClick={startEdit} className="ml-auto p-1.5 text-zinc-600 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-colors">
+                    <Pencil size={14} />
+                  </button>
+                </div>
 
-            <div className="space-y-3">
-              {doc.document_number && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">{t.documents.doc_number}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono text-zinc-100 text-sm">{doc.document_number}</span>
-                    <CopyButton value={doc.document_number} label={t.documents.doc_number} copyKey={`dn-${id}`} />
-                  </div>
+                <div className="space-y-3">
+                  {doc.document_number && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-500">{t.documents.doc_number}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-zinc-100 text-sm">{doc.document_number}</span>
+                        <CopyButton value={doc.document_number} label={t.documents.doc_number} copyKey={`dn-${id}`} />
+                      </div>
+                    </div>
+                  )}
+                  {doc.iin && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-500">ИИН</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-zinc-100 text-sm">{doc.iin}</span>
+                        <CopyButton value={doc.iin} label="ИИН" copyKey={`iin-${id}`} />
+                      </div>
+                    </div>
+                  )}
+                  {doc.issued_by && (
+                    <div className="flex items-start justify-between gap-4">
+                      <span className="text-xs text-zinc-500 flex-shrink-0">{t.documents.issued_by}</span>
+                      <div className="flex items-start gap-1 text-right min-w-0">
+                        <span className="text-sm text-zinc-300 break-words">{doc.issued_by}</span>
+                        <CopyButton value={doc.issued_by} label={t.documents.issued_by} copyKey={`isb-${id}`} className="flex-shrink-0 mt-0.5" />
+                      </div>
+                    </div>
+                  )}
+                  {doc.issue_date && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-500">{t.documents.issued_label}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm text-zinc-300">{formatDate(doc.issue_date)}</span>
+                        <CopyButton value={formatDate(doc.issue_date)} label={t.documents.issued_label} copyKey={`isd-${id}`} />
+                      </div>
+                    </div>
+                  )}
+                  {doc.expiry_date && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-zinc-500">{t.documents.expires_label}</span>
+                      <div className="flex items-center gap-1">
+                        <span className={`text-sm font-medium ${new Date(doc.expiry_date) < new Date() ? 'text-red-400' : 'text-zinc-200'}`}>
+                          {formatDate(doc.expiry_date)}
+                        </span>
+                        <CopyButton value={formatDate(doc.expiry_date)} label={t.documents.expires_label} copyKey={`expd-${id}`} />
+                      </div>
+                    </div>
+                  )}
+                  {doc.note && (
+                    <div className="pt-2 border-t border-zinc-800">
+                      <p className="text-xs text-zinc-500 mb-1">{t.common.note}</p>
+                      <p className="text-sm text-zinc-400">{doc.note}</p>
+                    </div>
+                  )}
                 </div>
-              )}
-              {doc.iin && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">ИИН</span>
-                  <div className="flex items-center gap-1">
-                    <span className="font-mono text-zinc-100 text-sm">{doc.iin}</span>
-                    <CopyButton value={doc.iin} label="ИИН" copyKey={`iin-${id}`} />
-                  </div>
-                </div>
-              )}
-              {doc.issued_by && (
-                <div className="flex items-start justify-between gap-4">
-                  <span className="text-xs text-zinc-500 flex-shrink-0">{t.documents.issued_by}</span>
-                  <div className="flex items-start gap-1 text-right min-w-0">
-                    <span className="text-sm text-zinc-300 break-words">{doc.issued_by}</span>
-                    <CopyButton value={doc.issued_by} label={t.documents.issued_by} copyKey={`isb-${id}`} className="flex-shrink-0 mt-0.5" />
-                  </div>
-                </div>
-              )}
-              {doc.issue_date && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">{t.documents.issued_label}</span>
-                  <div className="flex items-center gap-1">
-                    <span className="text-sm text-zinc-300">{formatDate(doc.issue_date)}</span>
-                    <CopyButton value={formatDate(doc.issue_date)} label={t.documents.issued_label} copyKey={`isd-${id}`} />
-                  </div>
-                </div>
-              )}
-              {doc.expiry_date && (
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-zinc-500">{t.documents.expires_label}</span>
-                  <div className="flex items-center gap-1">
-                    <span className={`text-sm font-medium ${new Date(doc.expiry_date) < new Date() ? 'text-red-400' : 'text-zinc-200'}`}>
-                      {formatDate(doc.expiry_date)}
-                    </span>
-                    <CopyButton value={formatDate(doc.expiry_date)} label={t.documents.expires_label} copyKey={`expd-${id}`} />
-                  </div>
-                </div>
-              )}
-              {doc.note && (
-                <div className="pt-2 border-t border-zinc-800">
-                  <p className="text-xs text-zinc-500 mb-1">{t.common.note}</p>
-                  <p className="text-sm text-zinc-400">{doc.note}</p>
-                </div>
-              )}
-            </div>
+              </>
+            )}
 
-            {/* Scan / PDF section */}
+            {/* Scan / PDF section — always shown */}
             <div className="mt-4 pt-4 border-t border-zinc-800">
               <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">{t.documents.file_section}</p>
               {doc.file_name ? (
@@ -304,7 +335,7 @@ export function DocumentDetailPage() {
                     <Upload size={13} /> {uploadingFile ? t.documents.file_uploading : t.documents.file_upload}
                     <input
                       type="file"
-                      accept="application/pdf"
+                      accept="application/pdf,image/jpeg,image/png"
                       className="hidden"
                       onChange={handleUploadFile}
                       disabled={uploadingFile}

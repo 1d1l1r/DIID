@@ -41,7 +41,7 @@ export interface ProfileListItem {
   passwords_count: number
 }
 
-export type DocumentType = 'id_card' | 'passport' | 'foreign_passport' | 'driver_license'
+export type DocumentType = 'id_card' | 'passport' | 'foreign_passport' | 'driver_license' | 'diploma' | 'birth_certificate' | 'power_of_attorney' | 'scan' | 'photo'
 
 /** Static English fallback. Use getDocTypeLabel(t, type) from i18n for localized labels. */
 export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
@@ -49,6 +49,11 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   passport: 'Passport',
   foreign_passport: 'Foreign Passport',
   driver_license: "Driver's License",
+  diploma: 'Diploma',
+  birth_certificate: 'Birth Certificate',
+  power_of_attorney: 'Power of Attorney',
+  scan: 'Scan / Copy',
+  photo: 'Photo',
 }
 
 export interface Document {

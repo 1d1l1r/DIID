@@ -11,7 +11,7 @@ import { type DocumentType } from '../../lib/types'
 import { useT, getT, getDocTypeLabel } from '../../lib/i18n'
 import toast from 'react-hot-toast'
 
-const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license']
+const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license', 'diploma', 'birth_certificate', 'power_of_attorney', 'scan', 'photo']
 const inputCls = 'w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-indigo-500 transition-colors'
 
 const initForm = () => ({

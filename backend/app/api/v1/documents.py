@@ -15,6 +15,8 @@ from app.schemas.document import DocumentCreate, DocumentOut, DocumentUpdate
 UPLOADS_DIR = Path("/app/uploads")
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
+ALLOWED_TYPES = {"application/pdf": ".pdf", "image/jpeg": ".jpg", "image/png": ".png"}
+
 router = APIRouter(tags=["documents"])
 
 
@@ -87,14 +89,15 @@ async def upload_file(
     db: Session = Depends(get_db),
     _: DBSession = Depends(get_current_session),
 ):
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=400, detail="Only PDF files are allowed")
+    if file.content_type not in ALLOWED_TYPES:
+        raise HTTPException(status_code=400, detail="Only PDF, JPG, PNG files are allowed")
     doc = document_crud.get(db, document_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     if doc.file_path:
         Path(doc.file_path).unlink(missing_ok=True)
-    path = UPLOADS_DIR / f"{document_id}.pdf"
+    ext = ALLOWED_TYPES[file.content_type]
+    path = UPLOADS_DIR / f"{document_id}{ext}"
     contents = await file.read()
     path.write_bytes(contents)
     doc.file_name = file.filename
@@ -112,7 +115,10 @@ def download_file(
     doc = document_crud.get(db, document_id)
     if not doc or not doc.file_path:
         raise HTTPException(status_code=404, detail="File not found")
-    return FileResponse(doc.file_path, filename=doc.file_name, media_type="application/pdf")
+    ext = Path(doc.file_path).suffix.lower()
+    media_map = {".pdf": "application/pdf", ".jpg": "image/jpeg", ".png": "image/png"}
+    media_type = media_map.get(ext, "application/octet-stream")
+    return FileResponse(doc.file_path, filename=doc.file_name, media_type=media_type)
 
 
 @router.delete("/documents/{document_id}/file", status_code=204)

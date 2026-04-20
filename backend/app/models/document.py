@@ -14,6 +14,11 @@ class DocumentType(str, enum.Enum):
     passport = "passport"
     foreign_passport = "foreign_passport"
     driver_license = "driver_license"
+    diploma = "diploma"
+    birth_certificate = "birth_certificate"
+    power_of_attorney = "power_of_attorney"
+    scan = "scan"
+    photo = "photo"
 
 
 class Document(Base, TimestampMixin):

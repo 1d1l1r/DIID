@@ -119,7 +119,15 @@ const en = {
     file_delete: 'Remove file',
     file_uploading: 'Uploading...',
     file_none: 'No scan attached',
-    file_only_pdf: 'Only PDF files are supported',
+    file_only_pdf: 'Only PDF, JPG or PNG files are supported',
+    type_diploma: 'Diploma',
+    type_birth_certificate: 'Birth Certificate',
+    type_power_of_attorney: 'Power of Attorney',
+    type_scan: 'Scan / Copy',
+    type_photo: 'Photo',
+    file_title: 'Title',
+    file_accepted_scan: 'PDF only',
+    file_accepted_photo: 'JPG or PNG',
   },
 
   // Cards
@@ -351,7 +359,15 @@ const ru: typeof en = {
     file_delete: 'Удалить файл',
     file_uploading: 'Загружаем...',
     file_none: 'Скан не прикреплён',
-    file_only_pdf: 'Поддерживаются только PDF файлы',
+    file_only_pdf: 'Поддерживаются PDF, JPG и PNG файлы',
+    type_diploma: 'Диплом',
+    type_birth_certificate: 'Свидетельство о рождении',
+    type_power_of_attorney: 'Доверенность',
+    type_scan: 'Скан / Копия',
+    type_photo: 'Фото',
+    file_title: 'Название',
+    file_accepted_scan: 'Только PDF',
+    file_accepted_photo: 'JPG или PNG',
   },
 
   cards: {
@@ -506,6 +522,11 @@ export function getDocTypeLabel(t: ReturnType<typeof useT>, type: string): strin
     passport: t.documents.type_passport,
     foreign_passport: t.documents.type_foreign_passport,
     driver_license: t.documents.type_driver,
+    diploma: t.documents.type_diploma,
+    birth_certificate: t.documents.type_birth_certificate,
+    power_of_attorney: t.documents.type_power_of_attorney,
+    scan: t.documents.type_scan,
+    photo: t.documents.type_photo,
   }
   return map[type] ?? type
 }
