@@ -11,7 +11,9 @@ import { type DocumentType } from '../../lib/types'
 import { useT, getT, getDocTypeLabel } from '../../lib/i18n'
 import toast from 'react-hot-toast'
 
-const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license', 'diploma', 'birth_certificate', 'power_of_attorney', 'scan', 'photo']
+const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license', 'diploma', 'birth_certificate', 'scan', 'photo']
+const SCAN_TYPES: DocumentType[] = ['scan', 'photo']
+const MEDIUM_TYPES: DocumentType[] = ['diploma', 'birth_certificate']
 const inputCls = 'w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-indigo-500 transition-colors'
 
 const initForm = () => ({
@@ -104,31 +106,59 @@ export function DocumentsPage() {
 
           <select
             value={form.type}
-            onChange={e => setForm(f => ({ ...f, type: e.target.value as DocumentType }))}
+            onChange={e => {
+              const newType = e.target.value as DocumentType
+              setForm(f => ({ ...f, type: newType,
+                document_number: '', iin: '', country: '', issued_by: '', issue_date: '', expiry_date: '', note: ''
+              }))
+            }}
             className={inputCls}
           >
             {DOC_TYPES.map(dt => <option key={dt} value={dt}>{getDocTypeLabel(t, dt)}</option>)}
           </select>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <input value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} placeholder={t.common.country} className={inputCls} />
-            <input value={form.document_number} onChange={e => setForm(f => ({ ...f, document_number: e.target.value }))} placeholder={t.documents.doc_number} className={inputCls + ' font-mono'} />
-            <input value={form.iin} onChange={e => setForm(f => ({ ...f, iin: e.target.value }))} placeholder={t.profiles.iin} className={inputCls + ' font-mono'} />
-            <input value={form.issued_by} onChange={e => setForm(f => ({ ...f, issued_by: e.target.value }))} placeholder={t.documents.issued_by} className={inputCls} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs text-zinc-500 mb-1 block">{t.documents.issued_label}</label>
-              <input type="date" value={form.issue_date} onChange={e => setForm(f => ({ ...f, issue_date: e.target.value }))} className={inputCls} />
-            </div>
-            <div>
-              <label className="text-xs text-zinc-500 mb-1 block">{t.documents.expires_label}</label>
-              <input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} className={inputCls} />
-            </div>
-          </div>
-
-          <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t.common.note} rows={2} className={inputCls + ' resize-none'} />
+          {SCAN_TYPES.includes(form.type) ? (
+            <input
+              value={form.issued_by}
+              onChange={e => setForm(f => ({ ...f, issued_by: e.target.value }))}
+              placeholder={t.documents.file_title}
+              className={inputCls}
+            />
+          ) : MEDIUM_TYPES.includes(form.type) ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input value={form.document_number} onChange={e => setForm(f => ({ ...f, document_number: e.target.value }))} placeholder={t.documents.doc_number} className={inputCls + ' font-mono'} />
+                <input value={form.issued_by} onChange={e => setForm(f => ({ ...f, issued_by: e.target.value }))}
+                  placeholder={form.type === 'diploma' ? t.documents.field_institution : t.documents.issued_by}
+                  className={inputCls} />
+              </div>
+              <div>
+                <label className="text-xs text-zinc-500 mb-1 block">{t.documents.issued_label}</label>
+                <input type="date" value={form.issue_date} onChange={e => setForm(f => ({ ...f, issue_date: e.target.value }))} className={inputCls} />
+              </div>
+              <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t.common.note} rows={2} className={inputCls + ' resize-none'} />
+            </>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <input value={form.country} onChange={e => setForm(f => ({ ...f, country: e.target.value }))} placeholder={t.common.country} className={inputCls} />
+                <input value={form.document_number} onChange={e => setForm(f => ({ ...f, document_number: e.target.value }))} placeholder={t.documents.doc_number} className={inputCls + ' font-mono'} />
+                <input value={form.iin} onChange={e => setForm(f => ({ ...f, iin: e.target.value }))} placeholder={t.profiles.iin} className={inputCls + ' font-mono'} />
+                <input value={form.issued_by} onChange={e => setForm(f => ({ ...f, issued_by: e.target.value }))} placeholder={t.documents.issued_by} className={inputCls} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs text-zinc-500 mb-1 block">{t.documents.issued_label}</label>
+                  <input type="date" value={form.issue_date} onChange={e => setForm(f => ({ ...f, issue_date: e.target.value }))} className={inputCls} />
+                </div>
+                <div>
+                  <label className="text-xs text-zinc-500 mb-1 block">{t.documents.expires_label}</label>
+                  <input type="date" value={form.expiry_date} onChange={e => setForm(f => ({ ...f, expiry_date: e.target.value }))} className={inputCls} />
+                </div>
+              </div>
+              <textarea value={form.note} onChange={e => setForm(f => ({ ...f, note: e.target.value }))} placeholder={t.common.note} rows={2} className={inputCls + ' resize-none'} />
+            </>
+          )}
 
           <button
             onClick={() => create.mutate()}

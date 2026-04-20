@@ -128,6 +128,7 @@ const en = {
     file_title: 'Title',
     file_accepted_scan: 'PDF only',
     file_accepted_photo: 'JPG or PNG',
+    field_institution: 'Institution',
   },
 
   // Cards
@@ -368,6 +369,7 @@ const ru: typeof en = {
     file_title: 'Название',
     file_accepted_scan: 'Только PDF',
     file_accepted_photo: 'JPG или PNG',
+    field_institution: 'Учебное заведение',
   },
 
   cards: {
