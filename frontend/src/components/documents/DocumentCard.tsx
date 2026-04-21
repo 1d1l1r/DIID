@@ -1,10 +1,11 @@
-import { FileText, Paperclip } from 'lucide-react'
+import { FileText, Paperclip, ImageOff } from 'lucide-react'
 import type { Document, DocumentType } from '../../lib/types'
 import { CopyButton } from '../common/CopyButton'
 import { FieldReveal } from '../common/FieldReveal'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
 import { formatDate } from '../../lib/utils'
 import { useT, getDocTypeLabel } from '../../lib/i18n'
+import { documentsApi } from '../../lib/api/documents'
 
 const SCAN_TYPES: DocumentType[] = ['scan', 'photo']
 
@@ -57,6 +58,25 @@ export function DocumentCard({ doc, onClick }: DocumentCardProps) {
           <Paperclip size={12} className="text-zinc-500 flex-shrink-0" />
         )}
       </div>
+
+      {/* Photo preview */}
+      {doc.type === 'photo' && doc.file_name && (
+        <div className="mb-3 -mx-1 rounded-lg overflow-hidden bg-zinc-800 flex items-center justify-center min-h-16">
+          <img
+            src={documentsApi.getFileUrl(doc.id)}
+            alt={doc.issued_by || doc.file_name}
+            className="max-h-52 w-auto object-contain"
+            onError={e => {
+              const el = e.currentTarget
+              el.style.display = 'none'
+              el.nextElementSibling?.classList.remove('hidden')
+            }}
+          />
+          <div className="hidden w-full py-6 flex items-center justify-center">
+            <ImageOff size={24} className="text-zinc-600" />
+          </div>
+        </div>
+      )}
 
       {/* Document number OR title for scan types */}
       <div className="flex items-center gap-1.5 mb-2" onClick={e => e.stopPropagation()}>
