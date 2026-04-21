@@ -272,7 +272,7 @@ const en = {
     tag_card: 'card',
     tag_password: 'password',
   },
-} as const
+}
 
 const ru: typeof en = {
   auth: {

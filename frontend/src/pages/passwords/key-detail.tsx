@@ -6,7 +6,6 @@ import {
   Paperclip, Download, Loader2,
 } from 'lucide-react'
 import { keysApi } from '../../lib/api/keys'
-import { CopyButton } from '../../components/common/CopyButton'
 import { FieldReveal } from '../../components/common/FieldReveal'
 import type { KeyEntry } from '../../lib/types'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
