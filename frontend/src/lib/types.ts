@@ -125,6 +125,17 @@ export interface SearchResults {
   passwords: Array<{ id: string; profile_id: string | null; title: string; login: string | null; matched_on: string }>
 }
 
+export interface KeyEntry {
+  id: string
+  profile_id: string | null
+  name: string
+  password: string | null
+  file_name: string | null
+  note: string | null
+  created_at: string
+  updated_at: string
+}
+
 export function fullName(p: Pick<Profile, 'last_name' | 'first_name' | 'middle_name'>): string {
   return [p.last_name, p.first_name, p.middle_name].filter(Boolean).join(' ')
 }

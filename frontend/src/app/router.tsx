@@ -11,6 +11,7 @@ import { CardsPage } from '../pages/cards/index.tsx'
 import { CardDetailPage } from '../pages/cards/detail'
 import { PasswordsPage } from '../pages/passwords/index.tsx'
 import { PasswordDetailPage } from '../pages/passwords/detail'
+import { KeyDetailPage } from '../pages/passwords/key-detail'
 import { SettingsPage } from '../pages/settings/index.tsx'
 import { VisibilityPage } from '../pages/settings/visibility'
 import { SessionsPage } from '../pages/settings/sessions'
@@ -38,6 +39,7 @@ export const router = createBrowserRouter([
       { path: 'cards/:id', element: <CardDetailPage /> },
       { path: 'passwords', element: <PasswordsPage /> },
       { path: 'passwords/:id', element: <PasswordDetailPage /> },
+      { path: 'keys/:id', element: <KeyDetailPage /> },
       { path: 'settings', element: <SettingsPage /> },
       { path: 'settings/visibility', element: <VisibilityPage /> },
       { path: 'settings/password', element: <ChangePasswordPage /> },

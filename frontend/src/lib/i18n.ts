@@ -175,6 +175,28 @@ const en = {
     no_profile: '— No profile —',
   },
 
+  // Keys
+  keys: {
+    title: 'Keys',
+    tab_passwords: 'Passwords',
+    new_key: 'New Key',
+    empty_title: 'No keys',
+    empty_desc: 'Add a .p12 / .pfx certificate',
+    ok_added: 'Key added',
+    ok_deleted: 'Key deleted',
+    ok_saved: 'Key saved',
+    name: 'Key name *',
+    password: 'Key password',
+    file_section: 'Certificate File',
+    file_upload: 'Attach .p12 / .pfx',
+    file_download: 'Download',
+    file_delete: 'Remove file',
+    file_uploading: 'Uploading...',
+    file_none: 'No certificate attached',
+    file_only_p12: 'Only .p12 and .pfx files are supported',
+    confirm_delete: 'Delete key?',
+  },
+
   // Settings
   settings: {
     title: 'Settings',
@@ -412,6 +434,27 @@ const ru: typeof en = {
     category: 'Категория',
     confirm_delete: 'Удалить запись?',
     no_profile: '— Без профиля —',
+  },
+
+  keys: {
+    title: 'Ключи',
+    tab_passwords: 'Пароли',
+    new_key: 'Новый ключ',
+    empty_title: 'Нет ключей',
+    empty_desc: 'Добавьте сертификат .p12 / .pfx',
+    ok_added: 'Ключ добавлен',
+    ok_deleted: 'Ключ удалён',
+    ok_saved: 'Ключ сохранён',
+    name: 'Название ключа *',
+    password: 'Пароль ключа',
+    file_section: 'Файл сертификата',
+    file_upload: 'Прикрепить .p12 / .pfx',
+    file_download: 'Скачать',
+    file_delete: 'Удалить файл',
+    file_uploading: 'Загружаем...',
+    file_none: 'Сертификат не прикреплён',
+    file_only_p12: 'Поддерживаются только .p12 и .pfx файлы',
+    confirm_delete: 'Удалить ключ?',
   },
 
   settings: {
