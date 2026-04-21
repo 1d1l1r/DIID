@@ -1,15 +1,17 @@
 # DIID — Personal Document Vault
 
-A self-hosted, encrypted vault for storing family documents, bank cards, and passwords. Runs entirely on your own server — no cloud, no third parties.
+A self-hosted, encrypted vault for storing family documents, bank cards, passwords, and certificates. Runs entirely on your own server — no cloud, no third parties.
 
 ---
 
 ## Features
 
 - **Profiles** — organize everything by person (family members, etc.)
-- **Documents** — ID cards, passports, driver's licenses with expiry tracking
+- **Documents** — ID cards, passports, driver's licenses, diplomas, birth certificates, scans and photos with expiry tracking
+- **File attachments** — attach a PDF scan to any document; attach a photo with inline preview for photo-type entries
 - **Bank cards** — stored with encrypted numbers and CVV, beautiful card UI
 - **Passwords** — service credentials grouped by category
+- **Keys** — store p12/pfx certificates with encrypted passwords and file download
 - **Field visibility** — per-field control: always visible / tap to reveal / confirm to reveal
 - **Search** — instant full-text search across all records
 - **EN / RU** — full interface localization with persistent preference
@@ -69,7 +71,7 @@ docker compose exec backend alembic upgrade head
 
 Open the app in your browser — you'll be prompted to create a master password on first run.
 
-> **Data lives in a named Docker volume** (`postgres_data`) and persists across restarts and image rebuilds.
+> **Data lives in named Docker volumes** (`postgres_data`, `uploads`) and persists across restarts and image rebuilds.
 
 ---
 
@@ -113,6 +115,20 @@ docker compose exec backend alembic upgrade head
 
 ---
 
+## Data Model Overview
+
+| Entity | Fields |
+|---|---|
+| **Profile** | Name, IIN, phone, birth date, address, tags, note |
+| **Document** | Type, country, number, IIN, issued by, dates, note, file attachment (PDF/JPG/PNG) |
+| **Card** | Bank, number, expiry, CVV, cardholder, color theme, note |
+| **Password** | Service, login, password, URL, category, note |
+| **Key** | Name, password, .p12/.pfx file attachment, note |
+
+All sensitive fields (document numbers, IINs, card numbers, CVVs, passwords, key passwords) are encrypted at rest.
+
+---
+
 ## Security Notes
 
 - Keep `.env` out of version control (already in `.gitignore`)
@@ -120,6 +136,7 @@ docker compose exec backend alembic upgrade head
 - Put the app behind a reverse proxy (nginx / Caddy) with HTTPS
 - `VAULT_ENCRYPTION_KEY` rotation is supported via comma-separated keys (MultiFernet)
 - Sessions are invalidated on master password change
+- Uploaded files are stored in a Docker volume (`uploads`), not served statically — access requires an active session cookie
 
 ---
 
