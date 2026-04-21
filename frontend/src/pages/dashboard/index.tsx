@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Users, FileText, CreditCard, KeyRound, ChevronDown, ArrowRight } from 'lucide-react'
+import { Users, FileText, CreditCard, KeyRound, KeySquare, ChevronDown, ArrowRight } from 'lucide-react'
 import { CopyButton } from '../../components/common/CopyButton'
 import { FieldReveal } from '../../components/common/FieldReveal'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
@@ -9,9 +9,11 @@ import { profilesApi } from '../../lib/api/profiles'
 import { documentsApi } from '../../lib/api/documents'
 import { cardsApi } from '../../lib/api/cards'
 import { passwordsApi } from '../../lib/api/passwords'
+import { keysApi } from '../../lib/api/keys'
 import { DocumentCard } from '../../components/documents/DocumentCard'
 import { BankCard } from '../../components/cards/BankCard'
 import { PasswordItem } from '../../components/passwords/PasswordItem'
+import { KeyItem } from '../../components/passwords/KeyItem'
 import { EmptyState } from '../../components/common/EmptyState'
 import { useT } from '../../lib/i18n'
 import type { ProfileListItem } from '../../lib/types'
@@ -51,12 +53,17 @@ function ProfileAccordionItem({ profile }: { profile: ProfileListItem }) {
     queryFn: () => passwordsApi.list({ profile_id: profile.id }),
     enabled: open,
   })
+  const { data: keys = [], isLoading: keysLoading } = useQuery({
+    queryKey: ['keys', profile.id],
+    queryFn: () => keysApi.listByProfile(profile.id),
+    enabled: open,
+  })
 
-  const isLoadingData = docsLoading || cardsLoading || pwdsLoading
+  const isLoadingData = docsLoading || cardsLoading || pwdsLoading || keysLoading
   const color = avatarColor(profile.last_name)
   const initials = `${profile.last_name[0] ?? ''}${profile.first_name[0] ?? ''}`.toUpperCase()
   const name = [profile.last_name, profile.first_name, profile.middle_name].filter(Boolean).join(' ')
-  const hasContent = profile.documents_count > 0 || profile.cards_count > 0 || profile.passwords_count > 0
+  const hasContent = profile.documents_count > 0 || profile.cards_count > 0 || profile.passwords_count > 0 || keys.length > 0
 
   return (
     <div className="rounded-xl bg-zinc-900 border border-zinc-800 overflow-hidden transition-colors">
@@ -108,6 +115,9 @@ function ProfileAccordionItem({ profile }: { profile: ProfileListItem }) {
           {profile.passwords_count > 0 && (
             <span className="flex items-center gap-1"><KeyRound size={11} />{profile.passwords_count}</span>
           )}
+          {!isLoadingData && keys.length > 0 && (
+            <span className="flex items-center gap-1"><KeySquare size={11} />{keys.length}</span>
+          )}
         </div>
 
         {/* Chevron */}
@@ -158,6 +168,17 @@ function ProfileAccordionItem({ profile }: { profile: ProfileListItem }) {
               <div className="space-y-1.5">
                 {passwords.map(p => (
                   <PasswordItem key={p.id} entry={p} onClick={() => navigate(`/passwords/${p.id}`)} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!isLoadingData && keys.length > 0 && (
+            <div>
+              <p className="text-xs text-zinc-600 uppercase tracking-wider mb-2.5">{t.dashboard.section_keys}</p>
+              <div className="space-y-1.5">
+                {keys.map(k => (
+                  <KeyItem key={k.id} entry={k} onClick={() => navigate(`/keys/${k.id}`)} />
                 ))}
               </div>
             </div>

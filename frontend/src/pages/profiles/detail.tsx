@@ -1,14 +1,16 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, FileText, CreditCard, KeyRound, Trash2, Pencil, Check, X, Plus, Eye, EyeOff } from 'lucide-react'
+import { ArrowLeft, FileText, CreditCard, KeyRound, KeySquare, Trash2, Pencil, Check, X, Plus, Eye, EyeOff } from 'lucide-react'
 import { profilesApi } from '../../lib/api/profiles'
 import { documentsApi } from '../../lib/api/documents'
 import { cardsApi } from '../../lib/api/cards'
 import { passwordsApi } from '../../lib/api/passwords'
+import { keysApi } from '../../lib/api/keys'
 import { DocumentCard } from '../../components/documents/DocumentCard'
 import { BankCard, getCardColorOptions } from '../../components/cards/BankCard'
 import { PasswordItem } from '../../components/passwords/PasswordItem'
+import { KeyItem } from '../../components/passwords/KeyItem'
 import { CopyButton } from '../../components/common/CopyButton'
 import { FieldReveal } from '../../components/common/FieldReveal'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
@@ -36,6 +38,7 @@ function profileToForm(p: Profile): ProfileEditForm {
 const initDocForm = () => ({ type: 'id_card' as DocumentType, country: '', document_number: '', iin: '', issued_by: '', issue_date: '', expiry_date: '', note: '' })
 const initCardForm = () => ({ bank_name: '', card_number: '', expiry_date: '', cardholder_name: '', cvv: '', color_theme: 'blue', note: '' })
 const initPwdForm = () => ({ title: '', login: '', password: '', url: '', category: '', note: '' })
+const initKeyForm = () => ({ name: '', password: '' })
 
 const inputCls = 'w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-indigo-500 transition-colors'
 const btnPrimary = 'flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 rounded-lg text-white text-sm font-medium transition-colors'
@@ -59,7 +62,9 @@ export function ProfileDetailPage() {
   const [docForm, setDocForm] = useState(initDocForm)
   const [cardForm, setCardForm] = useState(initCardForm)
   const [pwdForm, setPwdForm] = useState(initPwdForm)
+  const [keyForm, setKeyForm] = useState(initKeyForm)
   const [showNewPwd, setShowNewPwd] = useState(false)
+  const [showNewKeyPwd, setShowNewKeyPwd] = useState(false)
 
   // ── queries ──────────────────────────────────────────────────────────────
   const { data: profile } = useQuery({ queryKey: ['profile', id], queryFn: () => profilesApi.get(id!) })
@@ -67,6 +72,7 @@ export function ProfileDetailPage() {
   const { data: documents = [] } = useQuery({ queryKey: ['documents', id], queryFn: () => documentsApi.listByProfile(id!) })
   const { data: cards = [] } = useQuery({ queryKey: ['cards', id], queryFn: () => cardsApi.listByProfile(id!) })
   const { data: passwords = [] } = useQuery({ queryKey: ['passwords', id], queryFn: () => passwordsApi.list({ profile_id: id }) })
+  const { data: profileKeys = [] } = useQuery({ queryKey: ['keys', id], queryFn: () => keysApi.listByProfile(id!) })
 
   // ── profile mutations ─────────────────────────────────────────────────────
   const deleteProfile = useMutation({
@@ -144,6 +150,19 @@ export function ProfileDetailPage() {
     },
   })
 
+  const createKey = useMutation({
+    mutationFn: () => keysApi.create({
+      profile_id: id,
+      name: keyForm.name,
+      password: keyForm.password || null,
+    }),
+    onSuccess: () => {
+      const t = getT()
+      qc.invalidateQueries({ queryKey: ['keys', id] })
+      setShowCreate(false); setKeyForm(initKeyForm()); setShowNewKeyPwd(false); toast.success(t.keys.ok_added)
+    },
+  })
+
   // ─────────────────────────────────────────────────────────────────────────
   if (!profile) return (
     <div className="flex items-center justify-center py-20">
@@ -180,10 +199,11 @@ export function ProfileDetailPage() {
     { key: 'documents', label: t.profiles.tab_docs, icon: FileText },
     { key: 'cards', label: t.profiles.tab_cards, icon: CreditCard },
     { key: 'passwords', label: t.profiles.tab_passwords, icon: KeyRound },
+    { key: 'keys', label: t.profiles.tab_keys, icon: KeySquare },
   ]
 
   // ── create form content per tab ───────────────────────────────────────────
-  const isPendingCreate = createDoc.isPending || createCard.isPending || createPwd.isPending
+  const isPendingCreate = createDoc.isPending || createCard.isPending || createPwd.isPending || createKey.isPending
 
   const docCreateForm = (
     <div className="mb-4 p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
@@ -258,6 +278,23 @@ export function ProfileDetailPage() {
       <textarea value={pwdForm.note} onChange={e => setPwdForm(f => ({ ...f, note: e.target.value }))} placeholder={t.common.note} rows={2} className={inputCls + ' resize-none'} />
       <div className="flex gap-2">
         <button onClick={() => createPwd.mutate()} disabled={!pwdForm.title || isPendingCreate} className={btnPrimary}><Check size={14} />{createPwd.isPending ? t.common.adding : t.common.add}</button>
+        <button onClick={() => setShowCreate(false)} className={btnSecondary}><X size={14} />{t.common.cancel}</button>
+      </div>
+    </div>
+  )
+
+  const keyCreateForm = (
+    <div className="mb-4 p-4 rounded-xl bg-zinc-900 border border-zinc-800 space-y-3">
+      <p className="text-sm font-medium text-zinc-300">{t.keys.new_key}</p>
+      <input value={keyForm.name} onChange={e => setKeyForm(f => ({ ...f, name: e.target.value }))} placeholder={t.keys.name} className={inputCls} />
+      <div className="relative">
+        <input type={showNewKeyPwd ? 'text' : 'password'} value={keyForm.password} onChange={e => setKeyForm(f => ({ ...f, password: e.target.value }))} placeholder={t.keys.password} className={inputCls + ' pr-10 font-mono'} />
+        <button type="button" onClick={() => setShowNewKeyPwd(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors">
+          {showNewKeyPwd ? <EyeOff size={14} /> : <Eye size={14} />}
+        </button>
+      </div>
+      <div className="flex gap-2">
+        <button onClick={() => createKey.mutate()} disabled={!keyForm.name || isPendingCreate} className={btnPrimary}><Check size={14} />{createKey.isPending ? t.common.adding : t.common.add}</button>
         <button onClick={() => setShowCreate(false)} className={btnSecondary}><X size={14} />{t.common.cancel}</button>
       </div>
     </div>
@@ -361,7 +398,7 @@ export function ProfileDetailPage() {
             <Icon size={14} />
             <span className="hidden sm:inline">{label}</span>
             <span className="text-xs">
-              {key === 'documents' ? documents.length : key === 'cards' ? cards.length : passwords.length}
+              {key === 'documents' ? documents.length : key === 'cards' ? cards.length : key === 'passwords' ? passwords.length : profileKeys.length}
             </span>
           </button>
         ))}
@@ -403,6 +440,15 @@ export function ProfileDetailPage() {
           <div className="space-y-2">
             {passwords.map(p => <PasswordItem key={p.id} entry={p} onClick={() => navigate(`/passwords/${p.id}`)} />)}
             {passwords.length === 0 && !showCreate && <p className="text-zinc-600 text-sm">{t.profiles.tab_passwords}</p>}
+          </div>
+        </div>
+      )}
+      {tab === 'keys' && (
+        <div>
+          {showCreate && keyCreateForm}
+          <div className="space-y-2">
+            {profileKeys.map(k => <KeyItem key={k.id} entry={k} onClick={() => navigate(`/keys/${k.id}`)} />)}
+            {profileKeys.length === 0 && !showCreate && <p className="text-zinc-600 text-sm">{t.profiles.tab_keys}</p>}
           </div>
         </div>
       )}

@@ -5,6 +5,9 @@ export const keysApi = {
   list: (): Promise<KeyEntry[]> =>
     api.get('/keys').then(r => r.data),
 
+  listByProfile: (profileId: string): Promise<KeyEntry[]> =>
+    api.get('/keys', { params: { profile_id: profileId } }).then(r => r.data),
+
   get: (id: string): Promise<KeyEntry> =>
     api.get(`/keys/${id}`).then(r => r.data),
 

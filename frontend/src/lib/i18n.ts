@@ -65,6 +65,7 @@ const en = {
     section_docs: 'Documents',
     section_cards: 'Cards',
     section_passwords: 'Passwords',
+    section_keys: 'Keys',
   },
 
   // Profiles
@@ -86,6 +87,7 @@ const en = {
     tab_docs: 'Documents',
     tab_cards: 'Cards',
     tab_passwords: 'Passwords',
+    tab_keys: 'Keys',
   },
 
   // Documents
@@ -330,6 +332,7 @@ const ru: typeof en = {
     section_docs: 'Документы',
     section_cards: 'Карты',
     section_passwords: 'Пароли',
+    section_keys: 'Ключи',
   },
 
   profiles: {
@@ -350,6 +353,7 @@ const ru: typeof en = {
     tab_docs: 'Документы',
     tab_cards: 'Карты',
     tab_passwords: 'Пароли',
+    tab_keys: 'Ключи',
   },
 
   documents: {

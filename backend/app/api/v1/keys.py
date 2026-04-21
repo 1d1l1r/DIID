@@ -1,7 +1,7 @@
 import uuid
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile, status
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
@@ -21,10 +21,11 @@ router = APIRouter(prefix="/keys", tags=["keys"])
 
 @router.get("", response_model=list[KeyOut])
 def list_keys(
+    profile_id: uuid.UUID | None = Query(default=None),
     db: Session = Depends(get_db),
     _: DBSession = Depends(get_current_session),
 ):
-    return key_crud.get_list(db)
+    return key_crud.get_list(db, profile_id=profile_id)
 
 
 @router.post("", response_model=KeyOut, status_code=status.HTTP_201_CREATED)
