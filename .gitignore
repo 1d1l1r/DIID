@@ -50,7 +50,6 @@ desktop.ini
 .vscode/
 *.swp
 *.swo
-.claude/
 
 # ── Docker ───────────────────────────────────────────────────────────────────
 # Keep docker-compose.yml and Dockerfile
