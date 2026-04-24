@@ -199,6 +199,25 @@ const en = {
     confirm_delete: 'Delete key?',
   },
 
+  // PIN
+  pin: {
+    title: 'PIN Code',
+    desc: 'Quick screen lock',
+    status_set: 'PIN is active',
+    status_none: 'PIN not set',
+    set_pin: 'Set PIN',
+    change_pin: 'Change PIN',
+    remove_pin: 'Remove PIN',
+    enter_new: 'Enter new PIN',
+    confirm_pin: 'Confirm PIN',
+    wrong_pin: 'Wrong PIN',
+    pins_mismatch: 'PINs do not match, try again',
+    ok_set: 'PIN set',
+    ok_removed: 'PIN removed',
+    locked_title: 'Vault Locked',
+    logout_link: 'Sign out instead',
+  },
+
   // Settings
   settings: {
     title: 'Settings',
@@ -208,6 +227,8 @@ const en = {
     password_desc: 'Change the vault entry password',
     sessions_label: 'Active Sessions',
     sessions_desc: 'Manage sign-ins',
+    pin_label: 'PIN Code',
+    pin_desc: 'Quick screen lock',
   },
 
   // Visibility settings
@@ -461,6 +482,24 @@ const ru: typeof en = {
     confirm_delete: 'Удалить ключ?',
   },
 
+  pin: {
+    title: 'PIN-код',
+    desc: 'Быстрая блокировка экрана',
+    status_set: 'PIN активен',
+    status_none: 'PIN не установлен',
+    set_pin: 'Установить PIN',
+    change_pin: 'Изменить PIN',
+    remove_pin: 'Удалить PIN',
+    enter_new: 'Введите новый PIN',
+    confirm_pin: 'Подтвердите PIN',
+    wrong_pin: 'Неверный PIN',
+    pins_mismatch: 'PIN-коды не совпадают, попробуйте ещё раз',
+    ok_set: 'PIN установлен',
+    ok_removed: 'PIN удалён',
+    locked_title: 'Хранилище заблокировано',
+    logout_link: 'Выйти из системы',
+  },
+
   settings: {
     title: 'Настройки',
     visibility_label: 'Видимость полей',
@@ -469,6 +508,8 @@ const ru: typeof en = {
     password_desc: 'Изменить пароль для входа в хранилище',
     sessions_label: 'Активные сессии',
     sessions_desc: 'Управление входами в систему',
+    pin_label: 'PIN-код',
+    pin_desc: 'Быстрая блокировка экрана',
   },
 
   visibility: {

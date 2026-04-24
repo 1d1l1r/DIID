@@ -4,13 +4,15 @@ import { useQuery } from '@tanstack/react-query'
 import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
+import { PinLockScreen } from '../pin/PinLockScreen'
 import { settingsApi } from '../../lib/api/settings'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
+import { usePinStore } from '../../features/pin/pinStore'
 
 export function AppLayout() {
   const { setConfig } = useVisibilityStore()
+  const { pinHash, lock } = usePinStore()
 
-  // Load visibility settings from API and sync to store on app start
   const { data: settings } = useQuery({
     queryKey: ['settings'],
     queryFn: settingsApi.get,
@@ -20,6 +22,17 @@ export function AppLayout() {
   useEffect(() => {
     if (settings) setConfig(settings.visibility)
   }, [settings, setConfig])
+
+  // Auto-lock when tab becomes hidden
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && pinHash) {
+        lock()
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [pinHash, lock])
 
   return (
     <div className="flex h-screen bg-zinc-950 overflow-hidden">
@@ -40,6 +53,9 @@ export function AppLayout() {
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-zinc-900 border-t border-zinc-800 z-40">
         <MobileNav />
       </nav>
+
+      {/* PIN lock overlay — above everything */}
+      <PinLockScreen />
     </div>
   )
 }

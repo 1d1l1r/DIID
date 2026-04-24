@@ -16,6 +16,7 @@ import { SettingsPage } from '../pages/settings/index.tsx'
 import { VisibilityPage } from '../pages/settings/visibility'
 import { SessionsPage } from '../pages/settings/sessions'
 import { ChangePasswordPage } from '../pages/settings/password'
+import { PinSettingsPage } from '../pages/settings/pin'
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: 'settings/visibility', element: <VisibilityPage /> },
       { path: 'settings/password', element: <ChangePasswordPage /> },
       { path: 'settings/sessions', element: <SessionsPage /> },
+      { path: 'settings/pin', element: <PinSettingsPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
