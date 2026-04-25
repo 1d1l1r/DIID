@@ -199,6 +199,15 @@ const en = {
     confirm_delete: 'Delete key?',
   },
 
+  // Notes (decoy mode)
+  notes: {
+    title: 'Notes',
+    new_note: 'New Note',
+    empty: 'No notes yet',
+    placeholder_title: 'Title',
+    placeholder_content: 'Note...',
+  },
+
   // PIN
   pin: {
     title: 'PIN Code',
@@ -216,6 +225,18 @@ const en = {
     ok_removed: 'PIN removed',
     locked_title: 'Vault Locked',
     logout_link: 'Sign out instead',
+    lock_btn: 'Lock',
+    decoy_title: 'Decoy PIN',
+    decoy_desc: 'Opens a notes screen instead of the vault',
+    decoy_status_set: 'Decoy PIN is set',
+    decoy_status_none: 'Not configured',
+    set_decoy: 'Set Decoy PIN',
+    change_decoy: 'Change Decoy PIN',
+    remove_decoy: 'Remove Decoy PIN',
+    decoy_same_error: 'Must be different from your main PIN',
+    decoy_requires_pin: 'Set your main PIN first',
+    ok_decoy_set: 'Decoy PIN set',
+    ok_decoy_removed: 'Decoy PIN removed',
   },
 
   // Settings
@@ -482,6 +503,14 @@ const ru: typeof en = {
     confirm_delete: 'Удалить ключ?',
   },
 
+  notes: {
+    title: 'Заметки',
+    new_note: 'Новая заметка',
+    empty: 'Заметок пока нет',
+    placeholder_title: 'Заголовок',
+    placeholder_content: 'Заметка...',
+  },
+
   pin: {
     title: 'PIN-код',
     desc: 'Быстрая блокировка экрана',
@@ -498,6 +527,18 @@ const ru: typeof en = {
     ok_removed: 'PIN удалён',
     locked_title: 'Хранилище заблокировано',
     logout_link: 'Выйти из системы',
+    lock_btn: 'Заблокировать',
+    decoy_title: 'PIN-приманка',
+    decoy_desc: 'Открывает экран заметок вместо хранилища',
+    decoy_status_set: 'PIN-приманка установлен',
+    decoy_status_none: 'Не настроен',
+    set_decoy: 'Установить PIN-приманку',
+    change_decoy: 'Изменить PIN-приманку',
+    remove_decoy: 'Удалить PIN-приманку',
+    decoy_same_error: 'Должен отличаться от основного PIN',
+    decoy_requires_pin: 'Сначала установите основной PIN',
+    ok_decoy_set: 'PIN-приманка установлен',
+    ok_decoy_removed: 'PIN-приманка удалён',
   },
 
   settings: {

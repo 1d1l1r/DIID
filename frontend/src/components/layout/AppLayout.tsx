@@ -5,13 +5,14 @@ import { Sidebar } from './Sidebar'
 import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { PinLockScreen } from '../pin/PinLockScreen'
+import { DecoyApp } from '../decoy/DecoyApp'
 import { settingsApi } from '../../lib/api/settings'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
 import { usePinStore } from '../../features/pin/pinStore'
 
 export function AppLayout() {
   const { setConfig } = useVisibilityStore()
-  const { pinHash, lock } = usePinStore()
+  const { pinHash, lock, isDecoy } = usePinStore()
 
   const { data: settings } = useQuery({
     queryKey: ['settings'],
@@ -33,6 +34,9 @@ export function AppLayout() {
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [pinHash, lock])
+
+  // Decoy mode — show only the notes screen
+  if (isDecoy) return <DecoyApp />
 
   return (
     <div className="flex h-screen bg-zinc-950 overflow-hidden">

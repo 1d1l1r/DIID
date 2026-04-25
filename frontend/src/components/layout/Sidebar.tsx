@@ -1,11 +1,13 @@
 import { NavLink } from 'react-router-dom'
-import { Users, FileText, CreditCard, KeyRound, Settings, Shield } from 'lucide-react'
+import { Users, FileText, CreditCard, KeyRound, Settings, Shield, Lock } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useT, useLangStore } from '../../lib/i18n'
+import { usePinStore } from '../../features/pin/pinStore'
 
 export function Sidebar() {
   const t = useT()
   const { lang, setLang } = useLangStore()
+  const { pinHash, lock } = usePinStore()
 
   const NAV = [
     { to: '/', label: t.nav.home, icon: Shield, end: true },
@@ -47,6 +49,19 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {/* Lock button — only when PIN is set */}
+      {pinHash && (
+        <div className="px-3 pb-2">
+          <button
+            onClick={lock}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-zinc-500 hover:text-indigo-400 hover:bg-indigo-500/10 text-sm transition-colors"
+          >
+            <Lock size={15} />
+            {t.pin.lock_btn}
+          </button>
+        </div>
+      )}
 
       {/* Language toggle */}
       <div className="p-3 border-t border-zinc-800">
