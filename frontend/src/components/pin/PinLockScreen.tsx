@@ -19,7 +19,7 @@ const NUMPAD = [
 
 export function PinLockScreen() {
   const t = useT()
-  const { pinHash, isLocked, unlock, removePin } = usePinStore()
+  const { pinHash, isLocked, unlock } = usePinStore()
   const { logout } = useAuthStore()
   const navigate = useNavigate()
 
@@ -30,11 +30,13 @@ export function PinLockScreen() {
 
   const handleLogout = useCallback(async () => {
     try { await authApi.logout() } catch { /* ignore */ }
-    removePin()
+    // Do NOT call removePin() here — that would clear the PIN from localStorage
+    // and sync the removal to every other open tab in the same browser.
+    // The PIN belongs to the device; the server session is a separate concern.
     logout()
     queryClient.clear()
     navigate('/login')
-  }, [logout, navigate, removePin])
+  }, [logout, navigate])
 
   const tryUnlock = useCallback(async (pin: string) => {
     const ok = await unlock(pin)

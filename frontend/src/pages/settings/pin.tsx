@@ -35,8 +35,14 @@ function MiniPad({ onComplete, title, error }: {
     if (key === '⌫') { setDigits(d => d.slice(0, -1)); return }
     if (digits.length >= 4) return
     const next = [...digits, key]
-    setDigits(next)
-    if (next.length === 4) onComplete(next.join(''))
+    // Reset dots first — gives immediate visual feedback and unblocks the pad
+    // in case the parent's async handler takes time or throws.
+    if (next.length === 4) {
+      setDigits([])
+      onComplete(next.join(''))
+    } else {
+      setDigits(next)
+    }
   }, [digits, onComplete])
 
   useEffect(() => {
@@ -100,21 +106,48 @@ export function PinSettingsPage() {
   function handleFirstPin(pin: string) { setFirstPin(pin); setError(''); setStep('confirm') }
 
   async function handleConfirmPin(pin: string) {
-    if (pin !== firstPin) { setError(t.pin.pins_mismatch); setStep('enter'); setFirstPin(''); return }
-    await setPin(pin)
-    reset()
-    toast.success(t.pin.ok_set)
+    if (pin !== firstPin) {
+      setError(t.pin.pins_mismatch)
+      setStep('enter')
+      setFirstPin('')
+      return
+    }
+    try {
+      await setPin(pin)
+      reset()
+      toast.success(t.pin.ok_set)
+    } catch {
+      setError(t.pin.pins_mismatch) // crypto unavailable — show error, restart
+      setStep('enter')
+      setFirstPin('')
+    }
   }
 
   // ── Decoy PIN flow ──
   function handleFirstDecoy(pin: string) { setFirstPin(pin); setError(''); setStep('confirm_decoy') }
 
   async function handleConfirmDecoy(pin: string) {
-    if (pin !== firstPin) { setError(t.pin.pins_mismatch); setStep('enter_decoy'); setFirstPin(''); return }
-    const result = await setDecoyPin(pin)
-    if (result === 'same_as_real') { setError(t.pin.decoy_same_error); setStep('enter_decoy'); setFirstPin(''); return }
-    reset()
-    toast.success(t.pin.ok_decoy_set)
+    if (pin !== firstPin) {
+      setError(t.pin.pins_mismatch)
+      setStep('enter_decoy')
+      setFirstPin('')
+      return
+    }
+    try {
+      const result = await setDecoyPin(pin)
+      if (result === 'same_as_real') {
+        setError(t.pin.decoy_same_error)
+        setStep('enter_decoy')
+        setFirstPin('')
+        return
+      }
+      reset()
+      toast.success(t.pin.ok_decoy_set)
+    } catch {
+      setError(t.pin.pins_mismatch)
+      setStep('enter_decoy')
+      setFirstPin('')
+    }
   }
 
   const backLabel = step !== 'idle' ? t.common.back : t.settings.title
