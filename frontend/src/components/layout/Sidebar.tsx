@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { Users, FileText, CreditCard, KeyRound, Settings, Shield, Lock } from 'lucide-react'
+import { Users, FileText, CreditCard, KeyRound, Settings, Shield, Lock, MapPin } from 'lucide-react'
 import { cn } from '../../lib/utils'
 import { useT, useLangStore } from '../../lib/i18n'
 import { usePinStore } from '../../features/pin/pinStore'
@@ -15,6 +15,7 @@ export function Sidebar() {
     { to: '/documents', label: t.nav.documents, icon: FileText },
     { to: '/cards', label: t.nav.cards, icon: CreditCard },
     { to: '/passwords', label: t.nav.passwords, icon: KeyRound },
+    { to: '/stashes', label: t.nav.stashes, icon: MapPin },
     { to: '/settings', label: t.nav.settings, icon: Settings },
   ]
 

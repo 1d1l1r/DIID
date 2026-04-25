@@ -28,6 +28,7 @@ const en = {
     documents: 'Documents',
     cards: 'Cards',
     passwords: 'Passwords',
+    stashes: 'Stashes',
     settings: 'Settings',
   },
 
@@ -199,6 +200,29 @@ const en = {
     confirm_delete: 'Delete key?',
   },
 
+  // Stashes
+  stashes: {
+    title: 'Stashes',
+    new_stash: 'New Stash',
+    empty_title: 'No stashes yet',
+    empty_desc: 'Add a stash with coordinates and photos',
+    name: 'Name *',
+    coords: 'Coordinates',
+    coords_placeholder: '43.254418, 76.902194',
+    coords_invalid: 'Invalid coordinates',
+    description: 'Description',
+    ok_added: 'Stash added',
+    ok_deleted: 'Stash deleted',
+    ok_saved: 'Stash saved',
+    confirm_delete: 'Delete stash?',
+    images_section: 'Photos',
+    image_add: 'Add Photo',
+    image_max: 'Up to 5 photos',
+    image_uploading: 'Uploading...',
+    image_delete: 'Delete photo?',
+    image_only_img: 'Only image files are supported',
+  },
+
   // Notes (decoy mode)
   notes: {
     title: 'Notes',
@@ -339,6 +363,7 @@ const ru: typeof en = {
     documents: 'Документы',
     cards: 'Карты',
     passwords: 'Пароли',
+    stashes: 'Клады',
     settings: 'Настройки',
   },
 
@@ -501,6 +526,28 @@ const ru: typeof en = {
     file_none: 'Сертификат не прикреплён',
     file_only_p12: 'Поддерживаются только .p12 и .pfx файлы',
     confirm_delete: 'Удалить ключ?',
+  },
+
+  stashes: {
+    title: 'Клады',
+    new_stash: 'Новый клад',
+    empty_title: 'Кладов пока нет',
+    empty_desc: 'Добавьте клад с координатами и фото',
+    name: 'Название *',
+    coords: 'Координаты',
+    coords_placeholder: '43.254418, 76.902194',
+    coords_invalid: 'Некорректные координаты',
+    description: 'Описание',
+    ok_added: 'Клад добавлен',
+    ok_deleted: 'Клад удалён',
+    ok_saved: 'Клад сохранён',
+    confirm_delete: 'Удалить клад?',
+    images_section: 'Фото',
+    image_add: 'Добавить фото',
+    image_max: 'До 5 фотографий',
+    image_uploading: 'Загружаем...',
+    image_delete: 'Удалить фото?',
+    image_only_img: 'Поддерживаются только изображения',
   },
 
   notes: {

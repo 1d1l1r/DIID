@@ -136,6 +136,26 @@ export interface KeyEntry {
   updated_at: string
 }
 
+export interface StashImage {
+  id: string
+  stash_id: string
+  file_name: string
+  order: number
+  created_at: string
+}
+
+export interface Stash {
+  id: string
+  name: string
+  latitude: number | null
+  longitude: number | null
+  description: string | null
+  note: string | null
+  images: StashImage[]
+  created_at: string
+  updated_at: string
+}
+
 export function fullName(p: Pick<Profile, 'last_name' | 'first_name' | 'middle_name'>): string {
   return [p.last_name, p.first_name, p.middle_name].filter(Boolean).join(' ')
 }

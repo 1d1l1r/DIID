@@ -17,6 +17,8 @@ import { VisibilityPage } from '../pages/settings/visibility'
 import { SessionsPage } from '../pages/settings/sessions'
 import { ChangePasswordPage } from '../pages/settings/password'
 import { PinSettingsPage } from '../pages/settings/pin'
+import { StashesPage } from '../pages/stashes/index.tsx'
+import { StashDetailPage } from '../pages/stashes/detail'
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +48,8 @@ export const router = createBrowserRouter([
       { path: 'settings/password', element: <ChangePasswordPage /> },
       { path: 'settings/sessions', element: <SessionsPage /> },
       { path: 'settings/pin', element: <PinSettingsPage /> },
+      { path: 'stashes', element: <StashesPage /> },
+      { path: 'stashes/:id', element: <StashDetailPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
