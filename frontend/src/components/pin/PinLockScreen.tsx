@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Lock, Delete } from 'lucide-react'
 import { usePinStore } from '../../features/pin/pinStore'
@@ -23,16 +23,24 @@ export function PinLockScreen() {
   const { logout } = useAuthStore()
   const navigate = useNavigate()
 
-  const [digits, setDigits] = useState<string[]>([])
+  const [digits, setDigitsState] = useState<string[]>([])
   const [shake, setShake] = useState(false)
   const [attempts, setAttempts] = useState(0)
   const [error, setError] = useState('')
 
+  // Refs — always current, immune to stale closures on rapid mobile taps
+  const digitsRef = useRef<string[]>([])
+  const attemptsRef = useRef(0)
+
+  const setDigits = useCallback((next: string[]) => {
+    digitsRef.current = next
+    setDigitsState(next)
+  }, [])
+
   const handleLogout = useCallback(async () => {
     try { await authApi.logout() } catch { /* ignore */ }
-    // Do NOT call removePin() here — that would clear the PIN from localStorage
+    // Do NOT call removePin() — that would erase the PIN from localStorage
     // and sync the removal to every other open tab in the same browser.
-    // The PIN belongs to the device; the server session is a separate concern.
     logout()
     queryClient.clear()
     navigate('/login')
@@ -44,8 +52,10 @@ export function PinLockScreen() {
       setDigits([])
       setError('')
       setAttempts(0)
+      attemptsRef.current = 0
     } else {
-      const next = attempts + 1
+      const next = attemptsRef.current + 1
+      attemptsRef.current = next
       setAttempts(next)
       setShake(true)
       setDigits([])
@@ -56,23 +66,24 @@ export function PinLockScreen() {
         setError(t.pin.wrong_pin)
       }
     }
-  }, [unlock, attempts, handleLogout, t])
+  }, [unlock, handleLogout, t, setDigits])
 
+  // press reads from refs — no stale closures regardless of tap speed
   const press = useCallback((key: string) => {
     if (key === '⌫') {
-      setDigits(d => d.slice(0, -1))
+      setDigits(digitsRef.current.slice(0, -1))
       setError('')
       return
     }
-    if (digits.length >= 4) return
-    const next = [...digits, key]
+    const current = digitsRef.current
+    if (current.length >= 4) return
+    const next = [...current, key]
     setDigits(next)
     if (next.length === 4) {
       tryUnlock(next.join(''))
     }
-  }, [digits, tryUnlock])
+  }, [setDigits, tryUnlock])
 
-  // Physical keyboard support
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key >= '0' && e.key <= '9') press(e.key)

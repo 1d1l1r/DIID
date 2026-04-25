@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ArrowLeft, Delete, CheckCircle2, ShieldCheck, ShieldOff, AlertTriangle } from 'lucide-react'
 import { usePinStore } from '../../features/pin/pinStore'
@@ -20,8 +20,20 @@ function MiniPad({ onComplete, title, error }: {
   title: string
   error?: string
 }) {
-  const [digits, setDigits] = useState<string[]>([])
+  // Visual state — for rendering dots only
+  const [digits, setDigitsState] = useState<string[]>([])
   const [shake, setShake] = useState(false)
+
+  // Refs — always current, never stale in closures
+  const digitsRef = useRef<string[]>([])
+  const onCompleteRef = useRef(onComplete)
+  useEffect(() => { onCompleteRef.current = onComplete }, [onComplete])
+
+  // Keep ref and visual state in sync
+  const setDigits = useCallback((next: string[]) => {
+    digitsRef.current = next
+    setDigitsState(next)
+  }, [])
 
   useEffect(() => {
     if (error) {
@@ -29,21 +41,25 @@ function MiniPad({ onComplete, title, error }: {
       setDigits([])
       setTimeout(() => setShake(false), 500)
     }
-  }, [error])
+  }, [error, setDigits])
 
+  // press has NO dependency on digits or onComplete —
+  // it reads from refs so it's immune to stale closures on rapid taps
   const press = useCallback((key: string) => {
-    if (key === '⌫') { setDigits(d => d.slice(0, -1)); return }
-    if (digits.length >= 4) return
-    const next = [...digits, key]
-    // Reset dots first — gives immediate visual feedback and unblocks the pad
-    // in case the parent's async handler takes time or throws.
+    if (key === '⌫') {
+      setDigits(digitsRef.current.slice(0, -1))
+      return
+    }
+    const current = digitsRef.current
+    if (current.length >= 4) return
+    const next = [...current, key]
     if (next.length === 4) {
-      setDigits([])
-      onComplete(next.join(''))
+      setDigits([])                        // clear dots immediately
+      onCompleteRef.current(next.join('')) // fire with correct value
     } else {
       setDigits(next)
     }
-  }, [digits, onComplete])
+  }, [setDigits])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -117,7 +133,7 @@ export function PinSettingsPage() {
       reset()
       toast.success(t.pin.ok_set)
     } catch {
-      setError(t.pin.pins_mismatch) // crypto unavailable — show error, restart
+      setError(t.pin.pins_mismatch)
       setStep('enter')
       setFirstPin('')
     }
@@ -164,7 +180,6 @@ export function PinSettingsPage() {
       {/* ── IDLE ── */}
       {step === 'idle' && (
         <div className="space-y-3">
-          {/* Main PIN status card */}
           <div className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800 mb-2">
             <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
               pinHash ? 'bg-indigo-500/15 border border-indigo-500/30' : 'bg-zinc-800')}>
@@ -202,7 +217,6 @@ export function PinSettingsPage() {
             </button>
           )}
 
-          {/* ── Decoy PIN section ── */}
           <div className="mt-4 pt-4 border-t border-zinc-800 space-y-3">
             <div className="flex items-center gap-3 p-4 rounded-xl bg-zinc-900 border border-zinc-800">
               <div className={cn('w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0',
