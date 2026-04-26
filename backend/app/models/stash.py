@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 
 from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, TimestampMixin
@@ -11,7 +11,7 @@ from app.db.base import Base, TimestampMixin
 class Stash(Base, TimestampMixin):
     __tablename__ = "stashes"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name: Mapped[str] = mapped_column(String(256), nullable=False)
     latitude: Mapped[float | None] = mapped_column(Float)
     longitude: Mapped[float | None] = mapped_column(Float)
@@ -29,9 +29,9 @@ class Stash(Base, TimestampMixin):
 class StashImage(Base):
     __tablename__ = "stash_images"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     stash_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("stashes.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("stashes.id", ondelete="CASCADE"), nullable=False
     )
     file_name: Mapped[str] = mapped_column(String(256), nullable=False)
     file_path: Mapped[str] = mapped_column(String(512), nullable=False)

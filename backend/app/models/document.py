@@ -3,7 +3,7 @@ import uuid
 from datetime import date
 
 from sqlalchemy import Column, Date, Enum as SAEnum, ForeignKey, String, Text
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
@@ -24,9 +24,9 @@ class DocumentType(str, enum.Enum):
 class Document(Base, TimestampMixin):
     __tablename__ = "documents"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     profile_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
+        Uuid(as_uuid=True), ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False
     )
     type: Mapped[DocumentType] = mapped_column(
         SAEnum(DocumentType, name="document_type"), nullable=False

@@ -1,7 +1,7 @@
 import uuid
 
 from sqlalchemy import ForeignKey, Integer
-from sqlalchemy.dialects.postgresql import JSONB, UUID
+from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base, TimestampMixin
@@ -22,9 +22,9 @@ DEFAULT_VISIBILITY: dict = {
 class UserSettings(Base, TimestampMixin):
     __tablename__ = "user_settings"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
+        Uuid(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), unique=True, nullable=False
     )
-    visibility: Mapped[dict] = mapped_column(JSONB, nullable=False)
+    visibility: Mapped[dict] = mapped_column(JSON, nullable=False)
     auto_lock_minutes: Mapped[int | None] = mapped_column(Integer)
