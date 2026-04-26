@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Shield, Eye, EyeOff, Lock } from 'lucide-react'
+import { Eye, EyeOff, Lock } from 'lucide-react'
 import { authApi } from '../../lib/api/auth'
 import { useAuthStore } from '../../features/auth/authStore'
 import { useT, useLangStore } from '../../lib/i18n'
@@ -50,9 +50,7 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/25">
-            <Shield size={26} className="text-white" />
-          </div>
+          <img src="/logo.png" alt="DIID" className="w-20 h-20 mb-3 drop-shadow-lg" />
           {/* DIID + version — version is letter-spaced to match DIID width */}
           <div className="flex flex-col items-center">
             <h1 className="text-2xl font-bold text-zinc-100 tracking-tight leading-none">DIID</h1>
