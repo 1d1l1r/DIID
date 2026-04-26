@@ -27,15 +27,11 @@ hiddenimports = [
     *collect_submodules('jaraco'),
     'keyring.backends.Windows',
     'keyring.backends.fail',
-    'win32timezone',
-    'uvicorn.logging',
-    'uvicorn.loops',
-    'uvicorn.loops.auto',
-    'uvicorn.protocols',
-    'uvicorn.protocols.http',
-    'uvicorn.protocols.http.auto',
-    'uvicorn.lifespan',
-    'uvicorn.lifespan.on',
+    'jose',
+    'jose.jwt',
+    'jose.exceptions',
+    'passlib.handlers.bcrypt',
+    'passlib.handlers.argon2',
 ]
 
 a = Analysis(

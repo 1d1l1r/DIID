@@ -30,8 +30,13 @@ pyrightconfig.json
 # ── Node / Frontend ──────────────────────────────────────────────────────────
 node_modules/
 frontend/dist/
+frontend/dist-desktop/
 frontend/.vite/
 *.tsbuildinfo
+
+# ── Desktop / Tauri ──────────────────────────────────────────────────────────
+desktop/dist/
+desktop/build/
 
 # ── Environment / Secrets ────────────────────────────────────────────────────
 .env
