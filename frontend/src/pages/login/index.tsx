@@ -50,15 +50,9 @@ export function LoginPage() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="flex flex-col items-center mb-8">
-          <img src="/logo.png" alt="DIID" className="w-20 h-20 mb-3 drop-shadow-lg" />
-          {/* DIID + version — version is letter-spaced to match DIID width */}
-          <div className="flex flex-col items-center">
-            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight leading-none">DIID</h1>
-            <span className="text-[8px] font-semibold text-zinc-700 tracking-[0.5em] uppercase mt-1 w-full text-center">
-              v1.0.0
-            </span>
-          </div>
-          <p className="text-zinc-500 text-sm mt-2">
+          <img src="/logo.png" alt="DIID" className="w-20 h-20 drop-shadow-lg" />
+          <span className="text-[8px] font-semibold text-zinc-700 tracking-[0.5em] uppercase mt-1 mb-2">v1.0.0</span>
+          <p className="text-zinc-500 text-sm">
             {initialized ? t.auth.subtitle_login : t.auth.subtitle_setup}
           </p>
         </div>
