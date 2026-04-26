@@ -53,8 +53,14 @@ export function LoginPage() {
           <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center mb-4 shadow-lg shadow-indigo-600/25">
             <Shield size={26} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-zinc-100 tracking-tight">DIID</h1>
-          <p className="text-zinc-500 text-sm mt-1">
+          {/* DIID + version — version is letter-spaced to match DIID width */}
+          <div className="flex flex-col items-center">
+            <h1 className="text-2xl font-bold text-zinc-100 tracking-tight leading-none">DIID</h1>
+            <span className="text-[8px] font-semibold text-zinc-700 tracking-[0.5em] uppercase mt-1 w-full text-center">
+              v1.0.0
+            </span>
+          </div>
+          <p className="text-zinc-500 text-sm mt-2">
             {initialized ? t.auth.subtitle_login : t.auth.subtitle_setup}
           </p>
         </div>
@@ -67,6 +73,21 @@ export function LoginPage() {
             }} />
           : <SetupForm t={t} onSuccess={() => setInitialized(true)} />
         }
+
+        {/* Tagline */}
+        <p className="mt-8 text-center text-[11px] text-zinc-600 leading-relaxed">
+          Define{' '}
+          <span className="text-indigo-400 font-medium">Hence</span>
+          {' '}Confine Δ{' '}
+          <a
+            href="https://36.dorozhk.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-zinc-500 hover:text-zinc-300 transition-colors"
+          >
+            DOROZHK.IN WAS NOW(HERE)
+          </a>
+        </p>
       </div>
     </div>
   )
