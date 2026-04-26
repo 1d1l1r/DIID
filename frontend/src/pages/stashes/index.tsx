@@ -81,7 +81,7 @@ export function StashesPage() {
 
   const create = useMutation({
     mutationFn: (data: Parameters<typeof stashesApi.create>[0]) => stashesApi.create(data),
-    onSuccess: (stash) => {
+    onSuccess: () => {
       const t = getT()
       qc.invalidateQueries({ queryKey: ['stashes'] })
       toast.success(t.stashes.ok_added)

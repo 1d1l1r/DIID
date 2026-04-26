@@ -25,7 +25,6 @@ export function PinLockScreen() {
 
   const [digits, setDigitsState] = useState<string[]>([])
   const [shake, setShake] = useState(false)
-  const [attempts, setAttempts] = useState(0)
   const [error, setError] = useState('')
 
   // Refs — always current, immune to stale closures on rapid mobile taps
@@ -51,12 +50,10 @@ export function PinLockScreen() {
     if (ok) {
       setDigits([])
       setError('')
-      setAttempts(0)
       attemptsRef.current = 0
     } else {
       const next = attemptsRef.current + 1
       attemptsRef.current = next
-      setAttempts(next)
       setShake(true)
       setDigits([])
       setTimeout(() => setShake(false), 500)

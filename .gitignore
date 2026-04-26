@@ -51,6 +51,9 @@ desktop.ini
 *.swp
 *.swo
 
+# ── Claude Code ───────────────────────────────────────────────────────────────
+.claude/settings.local.json
+
 # ── Docker ───────────────────────────────────────────────────────────────────
 # Keep docker-compose.yml and Dockerfile
 # (postgres data lives in named volume, not here)

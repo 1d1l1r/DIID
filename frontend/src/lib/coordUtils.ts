@@ -20,17 +20,13 @@ export function parseCoords(input: string): { lat: number; lon: number } | null 
   // Match optional-sign + digits + optional(.digits)
   const dotNums = s.match(/-?\d+(?:\.\d+)?/g) ?? []
 
-  if (dotNums.length === 2) {
-    const lat = parseFloat(dotNums[0])
-    const lon = parseFloat(dotNums[1])
-    if (isValidCoords(lat, lon)) return { lat, lon }
-  }
-
-  // >2 dot-tokens: only trust if at least one of the first two is a proper decimal
-  if (dotNums.length > 2) {
-    if (dotNums[0].includes('.') || dotNums[1].includes('.')) {
-      const lat = parseFloat(dotNums[0])
-      const lon = parseFloat(dotNums[1])
+  if (dotNums.length >= 2) {
+    const a = dotNums[0]!
+    const b = dotNums[1]!
+    // 2 tokens: trust unconditionally; >2 tokens: only if at least one looks like a decimal
+    if (dotNums.length === 2 || a.includes('.') || b.includes('.')) {
+      const lat = parseFloat(a)
+      const lon = parseFloat(b)
       if (isValidCoords(lat, lon)) return { lat, lon }
     }
   }
@@ -42,25 +38,25 @@ export function parseCoords(input: string): { lat: number; lon: number } | null 
   if (ints.length === 4) {
     // "a,b [sep] c,d"  →  lat = a.b, lon = c.d
     // Strip any stray minus from the fractional part (e.g. "-50,-75" → -50.75)
-    const lat = parseFloat(`${ints[0]}.${ints[1].replace('-', '')}`)
-    const lon = parseFloat(`${ints[2]}.${ints[3].replace('-', '')}`)
+    const lat = parseFloat(`${ints[0]}.${ints[1]!.replace('-', '')}`)
+    const lon = parseFloat(`${ints[2]}.${ints[3]!.replace('-', '')}`)
     if (isValidCoords(lat, lon)) return { lat, lon }
   }
 
   if (ints.length === 2) {
-    const lat = parseFloat(ints[0])
-    const lon = parseFloat(ints[1])
+    const lat = parseFloat(ints[0]!)
+    const lon = parseFloat(ints[1]!)
     if (isValidCoords(lat, lon)) return { lat, lon }
   }
 
   if (ints.length === 3) {
     // "a,b [sep] c"
-    const lat1 = parseFloat(`${ints[0]}.${ints[1].replace('-', '')}`)
-    const lon1 = parseFloat(ints[2])
+    const lat1 = parseFloat(`${ints[0]}.${ints[1]!.replace('-', '')}`)
+    const lon1 = parseFloat(ints[2]!)
     if (isValidCoords(lat1, lon1)) return { lat: lat1, lon: lon1 }
     // "a [sep] b,c"
-    const lat2 = parseFloat(ints[0])
-    const lon2 = parseFloat(`${ints[1]}.${ints[2].replace('-', '')}`)
+    const lat2 = parseFloat(ints[0]!)
+    const lon2 = parseFloat(`${ints[1]}.${ints[2]!.replace('-', '')}`)
     if (isValidCoords(lat2, lon2)) return { lat: lat2, lon: lon2 }
   }
 
