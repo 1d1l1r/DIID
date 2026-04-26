@@ -12,6 +12,9 @@ A self-hosted, encrypted vault for storing family documents, bank cards, passwor
 - **Bank cards** — stored with encrypted numbers and CVV, beautiful card UI
 - **Passwords** — service credentials grouped by category
 - **Keys** — store p12/pfx certificates with encrypted passwords and file download
+- **Stashes** — geocached stash entries with coordinates (any format accepted, auto-normalised), description, private note and up to 5 photos per stash; full-screen gallery with zoom & swipe
+- **PIN lock screen** — 4-digit PIN overlays the app; auto-locks on page hide; max 5 attempts before automatic logout
+- **Decoy PIN** — enter a separate PIN to show a sanitised "nothing to see here" view
 - **Field visibility** — per-field control: always visible / tap to reveal / confirm to reveal
 - **Search** — instant full-text search across all records
 - **EN / RU** — full interface localization with persistent preference
@@ -124,6 +127,7 @@ docker compose exec backend alembic upgrade head
 | **Card** | Bank, number, expiry, CVV, cardholder, color theme, note |
 | **Password** | Service, login, password, URL, category, note |
 | **Key** | Name, password, .p12/.pfx file attachment, note |
+| **Stash** | Name, latitude, longitude, description, note, images (up to 5) |
 
 All sensitive fields (document numbers, IINs, card numbers, CVVs, passwords, key passwords) are encrypted at rest.
 
@@ -137,6 +141,7 @@ All sensitive fields (document numbers, IINs, card numbers, CVVs, passwords, key
 - `VAULT_ENCRYPTION_KEY` rotation is supported via comma-separated keys (MultiFernet)
 - Sessions are invalidated on master password change
 - Uploaded files are stored in a Docker volume (`uploads`), not served statically — access requires an active session cookie
+- PIN lock runs entirely client-side (hashed in the browser); uses SHA-256 in secure contexts (HTTPS/localhost) and a JS FNV-1a fallback on plain HTTP
 
 ---
 
