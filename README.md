@@ -1,5 +1,7 @@
 # DIID — Personal Document Vault
 
+![DIID](images/DIID-4AN.png)
+
 A self-hosted, encrypted vault for storing family documents, bank cards, passwords, and certificates. Runs entirely on your own server — no cloud, no third parties.
 
 ---
