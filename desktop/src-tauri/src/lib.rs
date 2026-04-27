@@ -10,21 +10,31 @@ use tauri::{
 struct BackendProcess(Mutex<Option<Child>>);
 
 fn find_sidecar() -> PathBuf {
-    let exe_dir = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_path_buf();
+    let exe_path = std::env::current_exe().unwrap();
+    let exe_dir = exe_path.parent().unwrap().to_path_buf();
 
     #[cfg(target_os = "windows")]
     let binary = "diid-backend.exe";
     #[cfg(not(target_os = "windows"))]
     let binary = "diid-backend";
 
+    // macOS .app bundle: exe is at Contents/MacOS/DIID
+    // resources land at  Contents/Resources/diid-backend/diid-backend
+    #[cfg(target_os = "macos")]
+    let prod = exe_dir
+        .parent().unwrap_or(&exe_dir)   // Contents/
+        .join("Resources")
+        .join("diid-backend")
+        .join(binary);
+
+    // Windows / Linux: sidecar sits next to the exe
+    #[cfg(not(target_os = "macos"))]
     let prod = exe_dir.join("diid-backend").join(binary);
+
     if prod.exists() {
         return prod;
     }
+    // Dev fallback: walk up to find desktop/dist/diid-backend
     exe_dir
         .ancestors()
         .find_map(|p| {

@@ -10,7 +10,8 @@
 #   - PyInstaller: pip install pyinstaller
 
 Set-StrictMode -Version Latest
-$ErrorActionPreference = "Stop"
+# "Continue" so pip/npm stderr warnings don't abort the script
+$ErrorActionPreference = "Continue"
 
 # Required to run .ps1 scripts (e.g. npx) in some environments
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass -Force

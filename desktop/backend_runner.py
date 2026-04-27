@@ -25,7 +25,13 @@ import time
 
 if getattr(sys, "frozen", False):
     BUNDLE_DIR = sys._MEIPASS  # type: ignore[attr-defined]
-    DATA_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "DIID")
+    _sys = sys.platform
+    if _sys == "win32":
+        DATA_DIR = os.path.join(os.environ.get("APPDATA", os.path.expanduser("~")), "DIID")
+    elif _sys == "darwin":
+        DATA_DIR = os.path.join(os.path.expanduser("~"), "Library", "Application Support", "DIID")
+    else:
+        DATA_DIR = os.path.join(os.environ.get("XDG_DATA_HOME", os.path.join(os.path.expanduser("~"), ".local", "share")), "DIID")
 else:
     BUNDLE_DIR = os.path.dirname(os.path.abspath(__file__))
     DATA_DIR = os.path.join(os.path.dirname(BUNDLE_DIR), "desktop_data")
