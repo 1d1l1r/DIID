@@ -323,6 +323,26 @@ const en = {
     ok_revoked: 'Session revoked',
   },
 
+  // Users management
+  users: {
+    title: 'Users',
+    label: 'Users',
+    desc: 'Manage vault access',
+    role_master: 'Master',
+    role_member: 'Member',
+    add_title: 'Add User',
+    password_placeholder: 'New user password',
+    btn_add: 'Add User',
+    adding: 'Adding...',
+    ok_added: 'User added',
+    err_add: 'Failed to add user',
+    limit: 'User limit reached (9)',
+    delete_account: 'Delete My Account',
+    confirm_delete: 'Delete your account? This cannot be undone.',
+    ok_deleted: 'Account deleted',
+    err_delete: 'Failed to delete account',
+  },
+
   // Field reveal
   reveal: {
     show_label: (label?: string) => `Show ${label ?? 'data'}?`,
@@ -642,6 +662,25 @@ const ru: typeof en = {
   sessions: {
     title: 'Активные сессии',
     ok_revoked: 'Сессия отозвана',
+  },
+
+  users: {
+    title: 'Пользователи',
+    label: 'Пользователи',
+    desc: 'Управление доступом к хранилищу',
+    role_master: 'Мастер',
+    role_member: 'Участник',
+    add_title: 'Добавить пользователя',
+    password_placeholder: 'Пароль нового пользователя',
+    btn_add: 'Добавить',
+    adding: 'Добавляем...',
+    ok_added: 'Пользователь добавлен',
+    err_add: 'Не удалось добавить пользователя',
+    limit: 'Достигнут лимит пользователей (9)',
+    delete_account: 'Удалить мой аккаунт',
+    confirm_delete: 'Удалить свой аккаунт? Это нельзя отменить.',
+    ok_deleted: 'Аккаунт удалён',
+    err_delete: 'Не удалось удалить аккаунт',
   },
 
   reveal: {

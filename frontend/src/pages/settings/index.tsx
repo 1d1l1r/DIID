@@ -1,18 +1,23 @@
 import { NavLink } from 'react-router-dom'
-import { Eye, Monitor, KeyRound, ShieldCheck, ChevronRight } from 'lucide-react'
+import { Eye, Monitor, KeyRound, ShieldCheck, ChevronRight, Users } from 'lucide-react'
 import { PageHeader } from '../../components/common/PageHeader'
 import { useT } from '../../lib/i18n'
 import { usePinStore } from '../../features/pin/pinStore'
+import { useAuthStore } from '../../features/auth/authStore'
 
 export function SettingsPage() {
   const t = useT()
   const { pinHash } = usePinStore()
+  const user = useAuthStore(s => s.user)
 
   const LINKS = [
     { to: '/settings/visibility', icon: Eye, label: t.settings.visibility_label, desc: t.settings.visibility_desc },
     { to: '/settings/password', icon: KeyRound, label: t.settings.password_label, desc: t.settings.password_desc },
     { to: '/settings/pin', icon: ShieldCheck, label: t.settings.pin_label, desc: pinHash ? t.pin.status_set : t.pin.status_none },
     { to: '/settings/sessions', icon: Monitor, label: t.settings.sessions_label, desc: t.settings.sessions_desc },
+    ...(user?.role === 'master'
+      ? [{ to: '/settings/users', icon: Users, label: t.users.label, desc: t.users.desc }]
+      : []),
   ]
 
   return (

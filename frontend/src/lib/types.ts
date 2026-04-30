@@ -1,6 +1,16 @@
+export type UserRole = 'master' | 'member'
+
 export interface User {
   id: string
   username: string
+  role: UserRole
+  created_at: string
+}
+
+export interface UserListItem {
+  id: string
+  username: string
+  role: UserRole
   created_at: string
 }
 

@@ -5,16 +5,21 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import update
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_session, get_current_user
+from app.api.deps import get_current_session, get_current_user, require_master
 from app.core.config import settings
 from app.core.security import generate_session_token, hash_password, hash_token, verify_password
 from app.db.session import get_db
 from app.models.session import Session as DBSession
 from app.models.user import User
 from app.models.user_settings import UserSettings, DEFAULT_VISIBILITY
-from app.schemas.auth import ChangePasswordRequest, LoginRequest, MeOut, SessionOut, SetupRequest
+from app.schemas.auth import (
+    ChangePasswordRequest, CreateUserRequest, LoginRequest,
+    MeOut, SessionOut, SetupRequest, UserListItem,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+MAX_USERS = 9
 
 
 @router.get("/status")
@@ -26,7 +31,7 @@ def vault_status(db: Session = Depends(get_db)):
 
 @router.post("/setup", status_code=status.HTTP_201_CREATED)
 def setup_vault(body: SetupRequest, db: Session = Depends(get_db)):
-    """Create the initial user. Fails with 409 if vault is already initialized."""
+    """Create the initial master user. Fails with 409 if vault is already initialized."""
     if db.query(User).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Vault already initialized")
 
@@ -34,6 +39,7 @@ def setup_vault(body: SetupRequest, db: Session = Depends(get_db)):
         id=uuid.uuid4(),
         username="admin",
         hashed_password=hash_password(body.password),
+        role="master",
     )
     db.add(user)
     db.flush()
@@ -49,15 +55,21 @@ def login(
     response: Response,
     db: Session = Depends(get_db),
 ):
-    user = db.query(User).first()
-    if not user or not verify_password(body.password, user.hashed_password):
+    users = db.query(User).all()
+    matched_user: User | None = None
+    for u in users:
+        if verify_password(body.password, u.hashed_password):
+            matched_user = u
+            break
+
+    if not matched_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
 
     token = generate_session_token()
     now = datetime.now(timezone.utc)
     session = DBSession(
         id=uuid.uuid4(),
-        user_id=user.id,
+        user_id=matched_user.id,
         token_hash=hash_token(token),
         device_name=request.headers.get("X-Device-Name"),
         user_agent=(request.headers.get("user-agent") or "")[:512],
@@ -95,6 +107,53 @@ def me(user: User = Depends(get_current_user)):
     return user
 
 
+@router.post("/users", status_code=status.HTTP_201_CREATED)
+def create_user(
+    body: CreateUserRequest,
+    master: User = Depends(require_master),
+    db: Session = Depends(get_db),
+):
+    """Master creates a new member user (password-only, no username input)."""
+    total = db.query(User).count()
+    if total >= MAX_USERS:
+        raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User limit reached ({MAX_USERS})")
+
+    username = f"user_{total}"
+    user = User(
+        id=uuid.uuid4(),
+        username=username,
+        hashed_password=hash_password(body.password),
+        role="member",
+    )
+    db.add(user)
+    db.flush()
+    db.add(UserSettings(id=uuid.uuid4(), user_id=user.id, visibility=DEFAULT_VISIBILITY))
+    db.commit()
+    return {"user_id": str(user.id), "username": username}
+
+
+@router.get("/users", response_model=list[UserListItem])
+def list_users(
+    _master: User = Depends(require_master),
+    db: Session = Depends(get_db),
+):
+    """Master-only: list all users."""
+    return db.query(User).order_by(User.created_at).all()
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_me(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Member deletes their own account. Master cannot delete themselves."""
+    if current_user.role == "master":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Master cannot delete themselves")
+    # Sessions are cascade-deleted via FK ondelete="CASCADE"
+    db.delete(current_user)
+    db.commit()
+
+
 @router.get("/sessions", response_model=list[SessionOut])
 def list_sessions(
     current: DBSession = Depends(get_current_session),
@@ -123,7 +182,6 @@ def change_password(
     if not verify_password(body.current_password, current_user.hashed_password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
 
-    # Use a direct UPDATE to avoid any ORM session-tracking edge cases
     db.execute(
         update(User)
         .where(User.id == current_user.id)
