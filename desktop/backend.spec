@@ -9,8 +9,11 @@ backend_dir = os.path.abspath(os.path.join(SPECPATH, '..', 'backend'))
 # Collect everything from the app package
 app_datas, app_binaries, app_hiddenimports = collect_all('app')
 
+frontend_dist = os.path.abspath(os.path.join(SPECPATH, '..', 'frontend', 'dist-desktop'))
+
 datas = [
     (os.path.join(backend_dir, 'app'), 'app'),
+    (frontend_dist, 'frontend_dist'),
     *app_datas,
 ]
 

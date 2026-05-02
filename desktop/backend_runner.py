@@ -19,6 +19,14 @@ import threading
 import webbrowser
 import time
 
+# ── Fix None stdio for PyInstaller console=False ─────────────────────────────
+# Without a console window, sys.stdout/stderr are None.
+# Uvicorn's formatter calls sys.stderr.isatty() which crashes.
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
+
 # ── Determine base paths ──────────────────────────────────────────────────────
 # When frozen by PyInstaller, sys._MEIPASS is the temp extraction dir.
 # Unpacked files (DB, uploads) live next to the .exe in APPDATA.
@@ -102,13 +110,51 @@ def init_db():
     import app.models.stash         # noqa
     import app.models.user_settings  # noqa
 
+    from sqlalchemy import event
+
     engine = create_engine(os.environ["DATABASE_URL"], connect_args={"check_same_thread": False})
+
+    @event.listens_for(engine, "connect")
+    def _set_sqlite_pragma(dbapi_conn, _):
+        cursor = dbapi_conn.cursor()
+        cursor.execute("PRAGMA foreign_keys=ON")
+        cursor.close()
+
     Base.metadata.create_all(bind=engine)
+
+# ── Serve frontend (desktop mode) ────────────────────────────────────────────
+
+def mount_frontend():
+    """Mount the SPA frontend on the FastAPI app for desktop mode."""
+    from fastapi.staticfiles import StaticFiles
+    from fastapi.responses import FileResponse
+    from app.main import app
+
+    # Determine frontend dist path
+    if getattr(sys, "frozen", False):
+        frontend_dir = os.path.join(sys._MEIPASS, "frontend_dist")  # type: ignore[attr-defined]
+    else:
+        frontend_dir = os.path.join(os.path.dirname(BUNDLE_DIR), "frontend", "dist-desktop")
+
+    index_html = os.path.join(frontend_dir, "index.html")
+
+    # SPA fallback: any non-API, non-file route returns index.html
+    @app.middleware("http")
+    async def spa_fallback(request, call_next):
+        response = await call_next(request)
+        if response.status_code == 404 and not request.url.path.startswith("/api/"):
+            return FileResponse(index_html)
+        return response
+
+    # Serve static assets (JS, CSS, images)
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="frontend")
+
 
 # ── Start uvicorn ─────────────────────────────────────────────────────────────
 
 def main():
     init_db()
+    mount_frontend()
 
     import uvicorn
     uvicorn.run(

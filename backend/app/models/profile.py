@@ -20,4 +20,4 @@ class Profile(Base, TimestampMixin):
     phone: Mapped[str | None] = mapped_column(String(32))
     address: Mapped[str | None] = mapped_column(Text)
     note: Mapped[str | None] = mapped_column(Text)
-    tags: Mapped[list] = mapped_column(JSON, nullable=False, server_default=text("'[]'::jsonb"))
+    tags: Mapped[list] = mapped_column(JSON, nullable=False, server_default=text("'[]'"))
