@@ -67,7 +67,7 @@ export function Sidebar() {
       {/* Language toggle */}
       <div className="p-3 border-t border-zinc-800">
         <div className="flex rounded-lg bg-zinc-800 p-0.5 gap-0.5">
-          {(['en', 'ru'] as const).map(l => (
+          {(['en', 'ru', 'kk'] as const).map(l => (
             <button
               key={l}
               onClick={() => setLang(l)}

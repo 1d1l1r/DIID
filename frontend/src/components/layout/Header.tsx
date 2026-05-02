@@ -65,11 +65,10 @@ export function Header() {
 
           {/* Language toggle — mobile only */}
           <button
-            onClick={() => setLang(lang === 'en' ? 'ru' : 'en')}
+            onClick={() => setLang(lang === 'en' ? 'ru' : lang === 'ru' ? 'kk' : 'en')}
             className="md:hidden flex items-center justify-center w-8 h-8 rounded-lg text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 transition-colors text-xs font-semibold"
-            title={lang === 'en' ? 'Switch to Russian' : 'Переключить на английский'}
           >
-            {lang === 'en' ? 'RU' : 'EN'}
+            {lang === 'en' ? 'RU' : lang === 'ru' ? 'KK' : 'EN'}
           </button>
 
           {/* Logout */}
