@@ -1,3 +1,4 @@
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -118,7 +119,24 @@ def create_user(
     if total >= MAX_USERS:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"User limit reached ({MAX_USERS})")
 
-    username = f"user_{total}"
+    # Prevent duplicate passwords — login relies on unique password matching
+    all_users = db.query(User).all()
+    for u in all_users:
+        if verify_password(body.password, u.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Password already in use by another account",
+            )
+
+    # Collision-safe username: find max existing index
+    existing = [u.username for u in all_users]
+    max_idx = 0
+    for name in existing:
+        m = re.match(r"^user_(\d+)$", name)
+        if m:
+            max_idx = max(max_idx, int(m.group(1)))
+    username = f"user_{max_idx + 1}"
+
     user = User(
         id=uuid.uuid4(),
         username=username,

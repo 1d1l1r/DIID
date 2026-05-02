@@ -16,8 +16,8 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column('users', sa.Column('role', sa.String(16), nullable=False, server_default='member'))
-    # Existing users (setup via /auth/setup) become master
-    op.execute("UPDATE users SET role = 'master' WHERE role = 'member'")
+    # First user (created via /auth/setup) becomes master
+    op.execute("UPDATE users SET role = 'master' WHERE username = 'admin'")
 
 
 def downgrade() -> None:
