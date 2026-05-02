@@ -5,12 +5,14 @@ import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router'
 import { queryClient } from './lib/query-client'
+import { PrivacyScreen } from './components/common/PrivacyScreen'
 import './styles/index.css'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <PrivacyScreen />
       <Toaster
         position="bottom-right"
         toastOptions={{
