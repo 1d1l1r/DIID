@@ -19,10 +19,12 @@ A self-hosted, encrypted vault for storing family documents, bank cards, passwor
 - **Decoy PIN** — enter a separate PIN to show a sanitised "nothing to see here" view
 - **Field visibility** — per-field control: always visible / tap to reveal / confirm to reveal
 - **Search** — instant full-text search across all records
-- **EN / RU** — full interface localization with persistent preference
+- **Multi-user** — master user creates up to 8 additional accounts; login by password only (no usernames); members can delete their own account
+- **EN / RU / KK** — full interface localization (English, Russian, Kazakh) with persistent preference
+- **Privacy screen** — hides sensitive data in iOS app switcher
 - **Sessions** — view and revoke active login sessions
 - **Encryption** — all sensitive fields encrypted at rest with Fernet (AES-128-CBC)
-- **Single master password** — argon2id hashing, no username needed
+- **Password-only auth** — argon2id hashing, no username needed; system identifies user by password match
 
 ## Tech Stack
 
@@ -33,6 +35,27 @@ A self-hosted, encrypted vault for storing family documents, bank cards, passwor
 | Frontend | React 19 · TypeScript · Vite · Tailwind CSS v4 |
 | State | Zustand · TanStack Query v5 |
 | Deployment | Docker · Docker Compose |
+| Desktop | Tauri v2 · PyInstaller sidecar · SQLite |
+
+---
+
+## Desktop App
+
+Standalone Windows application — no server required. Data stored locally in `%APPDATA%\DIID\`, encryption key in Windows Credential Manager.
+
+- **System tray** — minimize to tray, About dialog with version info
+- **PIN on hide** — auto-locks when closed to tray (not on minimize)
+- **Branded installer** — NSIS with custom sidebar image, MSI also available
+- **Clean uninstall** — kills processes, optionally removes vault data
+
+Download the latest installer from [Releases](https://github.com/1d1l1r/DIID/releases).
+
+To build from source:
+
+```powershell
+cd desktop
+powershell -ExecutionPolicy Bypass -File build_win.ps1
+```
 
 ---
 
