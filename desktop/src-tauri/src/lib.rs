@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use std::process::{Child, Command};
 use std::sync::Mutex;
 use tauri::{
+    Emitter,
     Manager,
     menu::{Menu, MenuItem},
     tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
@@ -71,9 +72,10 @@ pub fn run() {
             std::thread::sleep(std::time::Duration::from_millis(800));
 
             // ── System tray ──────────────────────────────────────────────
-            let show = MenuItem::with_id(app, "show", "Open DIID", true, None::<&str>)?;
-            let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&show, &quit])?;
+            let show  = MenuItem::with_id(app, "show",  "Open DIID", true, None::<&str>)?;
+            let about = MenuItem::with_id(app, "about", "About",     true, None::<&str>)?;
+            let quit  = MenuItem::with_id(app, "quit",  "Quit",      true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show, &about, &quit])?;
 
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
@@ -81,6 +83,13 @@ pub fn run() {
                 .tooltip("DIID")
                 .on_menu_event(|app, event| match event.id.as_ref() {
                     "show" => {
+                        if let Some(win) = app.get_webview_window("main") {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        }
+                    }
+                    "about" => {
+                        app.emit("tray-about", ()).ok();
                         if let Some(win) = app.get_webview_window("main") {
                             let _ = win.show();
                             let _ = win.set_focus();
@@ -115,6 +124,7 @@ pub fn run() {
             if let tauri::WindowEvent::CloseRequested { api, .. } = event {
                 api.prevent_close();
                 let _ = window.hide();
+                window.app_handle().emit("app-hidden", ()).ok();
             }
         })
         .run(tauri::generate_context!())

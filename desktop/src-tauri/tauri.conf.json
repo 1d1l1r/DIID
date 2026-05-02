@@ -42,7 +42,13 @@
         "type": "downloadBootstrapper"
       },
       "nsis": {
-        "sidebarImage": "installer/sidebar.bmp"
+        "sidebarImage": "installer/sidebar.bmp",
+        "headerImage": "installer/header.bmp",
+        "installerIcon": "icons/icon.ico"
+      },
+      "wix": {
+        "bannerPath": "installer/banner.bmp",
+        "dialogImagePath": "installer/dialog.bmp"
       }
     }
   }

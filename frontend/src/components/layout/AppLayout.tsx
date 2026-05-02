@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Sidebar } from './Sidebar'
@@ -6,13 +6,20 @@ import { Header } from './Header'
 import { MobileNav } from './MobileNav'
 import { PinLockScreen } from '../pin/PinLockScreen'
 import { DecoyApp } from '../decoy/DecoyApp'
+import { AboutModal } from './AboutModal'
 import { settingsApi } from '../../lib/api/settings'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
 import { usePinStore } from '../../features/pin/pinStore'
 
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+
 export function AppLayout() {
   const { setConfig } = useVisibilityStore()
   const { pinHash, lock, isDecoy } = usePinStore()
+  const [showAbout, setShowAbout] = useState(false)
+  const pinHashRef = useRef(pinHash)
+
+  useEffect(() => { pinHashRef.current = pinHash }, [pinHash])
 
   const { data: settings } = useQuery({
     queryKey: ['settings'],
@@ -24,8 +31,11 @@ export function AppLayout() {
     if (settings) setConfig(settings.visibility)
   }, [settings, setConfig])
 
-  // Auto-lock when tab becomes hidden
+  // In web: lock when browser tab becomes hidden (e.g. Alt+Tab away).
+  // In Tauri: handled by the app-hidden event below — visibilitychange fires
+  // for minimize too, so we skip it here to avoid locking on minimize.
   useEffect(() => {
+    if (isTauri) return
     const onVisibilityChange = () => {
       if (document.visibilityState === 'hidden' && pinHash) {
         lock()
@@ -34,6 +44,19 @@ export function AppLayout() {
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [pinHash, lock])
+
+  // Tauri-only: listen for tray events emitted from Rust
+  useEffect(() => {
+    if (!isTauri) return
+    const cleanup: Array<() => void> = []
+    import('@tauri-apps/api/event').then(({ listen }) => {
+      listen('tray-about', () => setShowAbout(true)).then(fn => cleanup.push(fn))
+      listen('app-hidden', () => {
+        if (pinHashRef.current) usePinStore.getState().lock()
+      }).then(fn => cleanup.push(fn))
+    })
+    return () => cleanup.forEach(fn => fn())
+  }, [])
 
   // Decoy mode — show only the notes screen
   if (isDecoy) return <DecoyApp />
@@ -60,6 +83,9 @@ export function AppLayout() {
 
       {/* PIN lock overlay — above everything */}
       <PinLockScreen />
+
+      {/* About dialog — triggered from tray menu */}
+      {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>
   )
 }
