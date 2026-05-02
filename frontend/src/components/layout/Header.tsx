@@ -77,7 +77,7 @@ export function Header() {
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors text-sm"
           >
             <LogOut size={15} />
-            <span className="hidden md:inline">{lang === 'en' ? 'Sign out' : 'Выйти'}</span>
+            <span className="hidden md:inline">{t.common.sign_out}</span>
           </button>
         </div>
       </header>

@@ -55,6 +55,7 @@ const en = {
     search_placeholder: 'Search...',
     unknown_device: 'Unknown device',
     current_session: 'current',
+    sign_out: 'Sign out',
   },
 
   // Dashboard
@@ -409,6 +410,7 @@ const ru: typeof en = {
     search_placeholder: 'Поиск...',
     unknown_device: 'Неизвестное устройство',
     current_session: 'текущая',
+    sign_out: 'Выйти',
   },
 
   dashboard: {
@@ -747,6 +749,7 @@ const kk: typeof en = {
     search_placeholder: 'Іздеу...',
     unknown_device: 'Белгісіз құрылғы',
     current_session: 'ағымдағы',
+    sign_out: 'Шығу',
   },
 
   dashboard: {
