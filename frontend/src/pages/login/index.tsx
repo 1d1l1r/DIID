@@ -34,7 +34,7 @@ export function LoginPage() {
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center px-4">
       {/* Language toggle — top right */}
       <div className="absolute top-4 right-4 flex rounded-lg bg-zinc-800 border border-zinc-700 p-0.5 gap-0.5">
-        {(['en', 'ru'] as const).map(l => (
+        {(['en', 'ru', 'kk'] as const).map(l => (
           <button
             key={l}
             onClick={() => setLang(l)}
