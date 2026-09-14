@@ -2,7 +2,7 @@
 
 ![DIID](images/DIID-4AN.png)
 
-A self-hosted, encrypted vault for storing family documents, bank cards, passwords, and certificates. Runs entirely on your own server — no cloud, no third parties.
+A self-hosted, encrypted vault for storing family documents, bank cards, passwords, and certificates. Vault data is hosted on your own server. Optional in-app maps and routing use external OpenStreetMap / FOSSGIS services, or configurable self-hosted alternatives.
 
 ---
 
@@ -21,7 +21,7 @@ A self-hosted, encrypted vault for storing family documents, bank cards, passwor
 - **Search** — instant full-text search across all records
 - **Multi-user** — master user creates up to 8 additional accounts; login by password only (no usernames); members can delete their own account
 - **EN / RU / KK** — full interface localization (English, Russian, Kazakh) with persistent preference
-- **Privacy screen** — hides sensitive data in iOS app switcher
+- **Privacy screen** — synchronously covers backgrounded pages and closes sensitive views; iOS app-switcher snapshots remain best-effort in a PWA
 - **Sessions** — view and revoke active login sessions
 - **Encryption** — all sensitive fields encrypted at rest with Fernet (AES-128-CBC)
 - **Password-only auth** — argon2id hashing, no username needed; system identifies user by password match
@@ -173,3 +173,7 @@ All sensitive fields (document numbers, IINs, card numbers, CVVs, passwords, key
 ## License
 
 MIT
+
+## Privacy, routes and profile addresses
+
+Stash details now include opt-in walking/car routes with live foreground location. Profiles support registered and residential addresses with a “same address” checkbox. Background locking closes image viewers and requires PIN again. See [implementation notes, migration steps and iPhone limitations](docs/privacy-navigation-addresses.md).

@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { pickFile } from '../../lib/pickFile'
+import { lazy, Suspense, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -13,6 +14,8 @@ import { useT, getT } from '../../lib/i18n'
 import { cn } from '../../lib/utils'
 import toast from 'react-hot-toast'
 
+const StashNavigation = lazy(() => import('../../components/stashes/StashNavigation'))
+
 const inputCls = 'w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-lg text-sm text-zinc-100 placeholder-zinc-500 outline-none focus:border-indigo-500 transition-colors'
 
 type EditForm = { name: string; coords: string; description: string; note: string }
@@ -22,8 +25,8 @@ export function StashDetailPage() {
   const navigate = useNavigate()
   const qc = useQueryClient()
   const t = useT()
-  const fileRef = useRef<HTMLInputElement>(null)
 
+  const [navigating, setNavigating] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editForm, setEditForm] = useState<EditForm | null>(null)
   const [coordsError, setCoordsError] = useState('')
@@ -121,8 +124,8 @@ export function StashDetailPage() {
     })
   }
 
-  async function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  async function handleImageChange() {
+    const file = await pickFile('image/*')
     if (!file) return
     if (!file.type.startsWith('image/')) {
       toast.error(t.stashes.image_only_img)
@@ -137,7 +140,6 @@ export function StashDetailPage() {
       toast.error(t.stashes.image_only_img)
     } finally {
       setUploading(false)
-      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
@@ -247,6 +249,15 @@ export function StashDetailPage() {
         )}
       </div>
 
+      {!editing && hasCoords && (navigating ? (
+        <Suspense fallback={<p className="text-sm text-zinc-400 mb-4">{t.navigation.routing}</p>}>
+          <StashNavigation key={`${stash.id}:${stash.latitude}:${stash.longitude}`} latitude={stash.latitude!} longitude={stash.longitude!} onClose={() => setNavigating(false)} />
+        </Suspense>
+      ) : <div className="mb-4 space-y-2">
+        <button onClick={() => setNavigating(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-medium"><MapPin size={16} />{t.navigation.start}</button>
+        <p className="text-xs text-zinc-500">{t.navigation.privacy}</p>
+      </div>)}
+
       {/* Images section */}
       {!editing && (
         <div className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 mb-4">
@@ -282,20 +293,12 @@ export function StashDetailPage() {
             ))}
 
             {stash.images.length < 5 && (
-              <label className="aspect-square rounded-lg bg-zinc-800 border-2 border-dashed border-zinc-700 hover:border-zinc-500 flex items-center justify-center cursor-pointer transition-colors">
-                <input
-                  ref={fileRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleImageChange}
-                  disabled={uploading}
-                />
+              <button onClick={handleImageChange} disabled={uploading} aria-label={t.common.add} className="aspect-square rounded-lg bg-zinc-800 border-2 border-dashed border-zinc-700 hover:border-zinc-500 flex items-center justify-center cursor-pointer transition-colors">
                 {uploading
                   ? <Loader2 size={18} className="text-zinc-500 animate-spin" />
                   : <Plus size={18} className="text-zinc-500" />
                 }
-              </label>
+              </button>
             )}
           </div>
 

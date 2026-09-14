@@ -12,6 +12,8 @@ class ProfileCreate(BaseModel):
     birth_date: date | None = None
     phone: str | None = None
     address: str | None = None
+    addresses_match: bool = True
+    residential_address: str | None = None
     note: str | None = None
     tags: list[str] = []
 
@@ -24,6 +26,8 @@ class ProfileUpdate(BaseModel):
     birth_date: date | None = None
     phone: str | None = None
     address: str | None = None
+    addresses_match: bool = True
+    residential_address: str | None = None
     note: str | None = None
     tags: list[str] | None = None
 
@@ -37,6 +41,8 @@ class ProfileOut(BaseModel):
     birth_date: date | None
     phone: str | None
     address: str | None
+    addresses_match: bool
+    residential_address: str | None
     note: str | None
     tags: list[str]
     created_at: datetime

@@ -12,6 +12,17 @@ from app.schemas.profile import ProfileCreate, ProfileUpdate
 
 
 class CRUDProfile(CRUDBase[Profile, ProfileCreate, ProfileUpdate]):
+    def create(self, db: Session, *, obj_in: ProfileCreate) -> Profile:
+        if obj_in.addresses_match:
+            obj_in = obj_in.model_copy(update={"residential_address": None})
+        return super().create(db, obj_in=obj_in)
+
+    def update(self, db: Session, *, db_obj: Profile, obj_in: ProfileUpdate) -> Profile:
+        changes = obj_in.model_dump(exclude_unset=True)
+        if changes.get("addresses_match", db_obj.addresses_match):
+            obj_in = obj_in.model_copy(update={"residential_address": None})
+        return super().update(db, db_obj=db_obj, obj_in=obj_in)
+
     def get_list(
         self, db: Session, q: str | None = None, tags: list[str] | None = None
     ) -> list[Profile]:

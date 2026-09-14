@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Plus, X } from 'lucide-react'
 import { profilesApi } from '../../lib/api/profiles'
+import { AddressFields } from '../../components/profiles/AddressFields'
 import { ProfileCard } from '../../components/profiles/ProfileCard'
 import { PageHeader } from '../../components/common/PageHeader'
 import { EmptyState } from '../../components/common/EmptyState'
@@ -14,7 +15,7 @@ export function ProfilesPage() {
   const qc = useQueryClient()
   const t = useT()
   const [showForm, setShowForm] = useState(false)
-  const [form, setForm] = useState({ last_name: '', first_name: '', middle_name: '', iin: '', phone: '' })
+  const [form, setForm] = useState({ last_name: '', first_name: '', middle_name: '', iin: '', phone: '', address: '', addresses_match: true, residential_address: '' })
 
   const { data: profiles = [], isLoading } = useQuery({
     queryKey: ['profiles'],
@@ -22,12 +23,12 @@ export function ProfilesPage() {
   })
 
   const create = useMutation({
-    mutationFn: () => profilesApi.create(form),
+    mutationFn: () => profilesApi.create({ ...form, address: form.address.trim() || null, residential_address: form.addresses_match ? null : form.residential_address.trim() || null }),
     onSuccess: () => {
       const t = getT()
       qc.invalidateQueries({ queryKey: ['profiles'] })
       setShowForm(false)
-      setForm({ last_name: '', first_name: '', middle_name: '', iin: '', phone: '' })
+      setForm({ last_name: '', first_name: '', middle_name: '', iin: '', phone: '', address: '', addresses_match: true, residential_address: '' })
       toast.success(t.profiles.ok_saved)
     },
   })
@@ -69,6 +70,7 @@ export function ProfilesPage() {
               />
             ))}
           </div>
+          <AddressFields value={form} onChange={changes => setForm(f => ({ ...f, ...changes }))} />
           <button
             onClick={() => create.mutate()}
             disabled={!form.last_name || !form.first_name || create.isPending}

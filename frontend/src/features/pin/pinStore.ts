@@ -46,6 +46,8 @@ async function hashPin(pin: string): Promise<string> {
 
 // ── Store ─────────────────────────────────────────────────────────────────────
 
+let lockGeneration = 0
+
 interface PinState {
   pinHash: string | null
   decoyPinHash: string | null
@@ -83,10 +85,15 @@ export const usePinStore = create<PinState>()(
 
       removeDecoyPin: () => set({ decoyPinHash: null }),
 
-      lock: () => set({ isLocked: true, isDecoy: false }),
+      lock: () => {
+        lockGeneration++
+        set({ isLocked: true, isDecoy: false })
+      },
 
       unlock: async (pin) => {
+        const generation = lockGeneration
         const hash = await hashPin(pin)
+        if (generation !== lockGeneration || document.hidden) return false
         if (hash === get().pinHash) {
           set({ isLocked: false, isDecoy: false })
           return true

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { Sidebar } from './Sidebar'
@@ -11,15 +11,15 @@ import { settingsApi } from '../../lib/api/settings'
 import { useVisibilityStore } from '../../features/visibility/visibilityStore'
 import { usePinStore } from '../../features/pin/pinStore'
 
+import { useConcealed } from '../../lib/privacy'
+
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
 export function AppLayout() {
   const { setConfig } = useVisibilityStore()
-  const { pinHash, lock, isDecoy } = usePinStore()
+  const { pinHash, isLocked, isDecoy } = usePinStore()
+  const concealed = useConcealed()
   const [showAbout, setShowAbout] = useState(false)
-  const pinHashRef = useRef(pinHash)
-
-  useEffect(() => { pinHashRef.current = pinHash }, [pinHash])
 
   const { data: settings } = useQuery({
     queryKey: ['settings'],
@@ -31,32 +31,24 @@ export function AppLayout() {
     if (settings) setConfig(settings.visibility)
   }, [settings, setConfig])
 
-  // In web: lock when browser tab becomes hidden (e.g. Alt+Tab away).
-  // In Tauri: handled by the app-hidden event below — visibilitychange fires
-  // for minimize too, so we skip it here to avoid locking on minimize.
-  useEffect(() => {
-    if (isTauri) return
-    const onVisibilityChange = () => {
-      if (document.visibilityState === 'hidden' && pinHash) {
-        lock()
-      }
-    }
-    document.addEventListener('visibilitychange', onVisibilityChange)
-    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [pinHash, lock])
-
   // Tauri-only: listen for tray events emitted from Rust
   useEffect(() => {
     if (!isTauri) return
     const cleanup: Array<() => void> = []
+    let disposed = false
+    const remember = (fn: () => void) => disposed ? fn() : cleanup.push(fn)
     import('@tauri-apps/api/event').then(({ listen }) => {
-      listen('tray-about', () => setShowAbout(true)).then(fn => cleanup.push(fn))
+      listen('tray-about', () => setShowAbout(true)).then(remember)
       listen('app-hidden', () => {
-        if (pinHashRef.current) usePinStore.getState().lock()
-      }).then(fn => cleanup.push(fn))
+        if (usePinStore.getState().pinHash) usePinStore.getState().lock()
+      }).then(remember)
     })
-    return () => cleanup.forEach(fn => fn())
+    return () => { disposed = true; cleanup.forEach(fn => fn()) }
   }, [])
+
+  // Remove the vault tree, including body portals, while locked/backgrounded.
+  if (pinHash && isLocked) return <PinLockScreen />
+  if (concealed) return null
 
   // Decoy mode — show only the notes screen
   if (isDecoy) return <DecoyApp />
@@ -80,9 +72,6 @@ export function AppLayout() {
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-zinc-900 border-t border-zinc-800 z-40">
         <MobileNav />
       </nav>
-
-      {/* PIN lock overlay — above everything */}
-      <PinLockScreen />
 
       {/* About dialog — triggered from tray menu */}
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}

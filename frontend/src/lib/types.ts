@@ -32,6 +32,8 @@ export interface Profile {
   birth_date: string | null
   phone: string | null
   address: string | null
+  addresses_match: boolean
+  residential_address: string | null
   note: string | null
   tags: string[]
   created_at: string

@@ -30,6 +30,7 @@ export function PinLockScreen() {
   // Refs — always current, immune to stale closures on rapid mobile taps
   const digitsRef = useRef<string[]>([])
   const attemptsRef = useRef(0)
+  const checkingRef = useRef(false)
 
   const setDigits = useCallback((next: string[]) => {
     digitsRef.current = next
@@ -46,7 +47,10 @@ export function PinLockScreen() {
   }, [logout, navigate])
 
   const tryUnlock = useCallback(async (pin: string) => {
+    if (checkingRef.current) return
+    checkingRef.current = true
     const ok = await unlock(pin)
+    checkingRef.current = false
     if (ok) {
       setDigits([])
       setError('')
@@ -67,6 +71,7 @@ export function PinLockScreen() {
 
   // press reads from refs — no stale closures regardless of tap speed
   const press = useCallback((key: string) => {
+    if (checkingRef.current || document.hidden) return
     if (key === '⌫') {
       setDigits(digitsRef.current.slice(0, -1))
       setError('')
@@ -83,7 +88,7 @@ export function PinLockScreen() {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key >= '0' && e.key <= '9') press(e.key)
+      if (e.key >= '0' && e.key <= '9') { e.preventDefault(); press(e.key) }
       else if (e.key === 'Backspace') press('⌫')
     }
     window.addEventListener('keydown', onKey)
@@ -93,7 +98,7 @@ export function PinLockScreen() {
   if (!pinHash || !isLocked) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-zinc-950">
+    <div className="fixed inset-0 z-[100000] flex flex-col items-center justify-center bg-zinc-950">
       {/* Icon + title */}
       <div className="flex flex-col items-center mb-10">
         <div className="w-16 h-16 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center mb-4">

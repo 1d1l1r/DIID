@@ -121,6 +121,9 @@ def init_db():
         cursor.close()
 
     Base.metadata.create_all(bind=engine)
+    # create_all does not add columns to an existing desktop vault.
+    from app.db.desktop_migrations import upgrade_profile_addresses
+    upgrade_profile_addresses(engine)
 
 # ── Serve frontend (desktop mode) ────────────────────────────────────────────
 

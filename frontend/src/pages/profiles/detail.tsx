@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, FileText, CreditCard, KeyRound, KeySquare, Trash2, Pencil, Check, X, Plus, Eye, EyeOff } from 'lucide-react'
+import { AddressFields, type AddressValues } from '../../components/profiles/AddressFields'
 import { profilesApi } from '../../lib/api/profiles'
 import { documentsApi } from '../../lib/api/documents'
 import { cardsApi } from '../../lib/api/cards'
@@ -22,7 +23,7 @@ import { useT, getT, getDocTypeLabel } from '../../lib/i18n'
 const DOC_TYPES: DocumentType[] = ['id_card', 'passport', 'foreign_passport', 'driver_license']
 
 // ─── edit profile form ───────────────────────────────────────────────────────
-type ProfileEditForm = {
+type ProfileEditForm = AddressValues & {
   last_name: string; first_name: string; middle_name: string
   iin: string; phone: string; birth_date: string; address: string; note: string; tags: string
 }
@@ -30,7 +31,7 @@ function profileToForm(p: Profile): ProfileEditForm {
   return {
     last_name: p.last_name, first_name: p.first_name, middle_name: p.middle_name ?? '',
     iin: p.iin ?? '', phone: p.phone ?? '', birth_date: p.birth_date ?? '',
-    address: p.address ?? '', note: p.note ?? '', tags: p.tags.join(', '),
+    address: p.address ?? '', addresses_match: p.addresses_match ?? true, residential_address: p.residential_address ?? '', note: p.note ?? '', tags: p.tags.join(', '),
   }
 }
 
@@ -182,10 +183,12 @@ export function ProfileDetailPage() {
       last_name: editForm.last_name, first_name: editForm.first_name,
       middle_name: editForm.middle_name || null, iin: editForm.iin || null,
       phone: editForm.phone || null, birth_date: editForm.birth_date || null,
-      address: editForm.address || null, note: editForm.note || null, tags,
+      address: editForm.address.trim() || null,
+      addresses_match: editForm.addresses_match,
+      residential_address: editForm.addresses_match ? null : editForm.residential_address.trim() || null, note: editForm.note || null, tags,
     })
   }
-  function field(key: keyof ProfileEditForm) {
+  function field(key: Exclude<keyof ProfileEditForm, 'addresses_match'>) {
     return {
       value: editForm?.[key] ?? '',
       onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -321,8 +324,8 @@ export function ProfileDetailPage() {
               <input {...field('iin')} placeholder={t.profiles.iin} className={inputCls} />
               <input {...field('phone')} placeholder={t.profiles.phone} className={inputCls} />
               <input {...field('birth_date')} type="date" className={inputCls} />
-              <input {...field('address')} placeholder={t.profiles.address} className={inputCls} />
             </div>
+            <AddressFields value={editForm} onChange={changes => setEditForm(f => f ? { ...f, ...changes } : f)} />
             <textarea {...field('note')} placeholder={t.common.note} rows={2} className={inputCls + ' resize-none'} />
             <input {...field('tags')} placeholder={t.common.tags} className={inputCls} />
             <div className="flex gap-2 pt-1">
@@ -362,7 +365,10 @@ export function ProfileDetailPage() {
                 )}
                 {profile.birth_date && <span className="text-zinc-500">{formatDate(profile.birth_date)}</span>}
               </div>
-              {profile.address && <p className="text-xs text-zinc-600 mt-1 truncate">{profile.address}</p>}
+              {profile.address && <p className="text-xs text-zinc-400 mt-2 break-words">{t.profiles.address}: {profile.address}</p>}
+              {profile.addresses_match
+                ? profile.address && <p className="text-xs text-zinc-500 mt-1">{t.profiles.addresses_match}</p>
+                : profile.residential_address && <p className="text-xs text-zinc-400 mt-1 break-words">{t.profiles.residential_address}: {profile.residential_address}</p>}
               {profile.note && <p className="text-xs text-zinc-500 mt-1 italic">{profile.note}</p>}
               {profile.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-2">

@@ -62,3 +62,8 @@ desktop.ini
 # ── Docker ───────────────────────────────────────────────────────────────────
 # Keep docker-compose.yml and Dockerfile
 # (postgres data lives in named volume, not here)
+
+# Browser regression artifacts
+frontend/test-results/
+frontend/playwright-report/
+backend/test.db

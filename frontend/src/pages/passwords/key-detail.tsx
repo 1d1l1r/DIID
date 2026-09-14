@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react'
+import { pickFile } from '../../lib/pickFile'
+import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -31,7 +32,6 @@ export function KeyDetailPage() {
   const [editForm, setEditForm] = useState<EditForm | null>(null)
   const [showPwd, setShowPwd] = useState(false)
   const [uploading, setUploading] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
 
   const { data: entry } = useQuery({ queryKey: ['key', id], queryFn: () => keysApi.get(id!) })
 
@@ -81,8 +81,8 @@ export function KeyDetailPage() {
     })
   }
 
-  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
+  async function handleFileChange() {
+    const file = await pickFile('.p12,.pfx')
     if (!file) return
     const ext = file.name.split('.').pop()?.toLowerCase()
     if (ext !== 'p12' && ext !== 'pfx') {
@@ -98,7 +98,6 @@ export function KeyDetailPage() {
       toast.error(t.keys.file_only_p12)
     } finally {
       setUploading(false)
-      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
@@ -216,7 +215,7 @@ export function KeyDetailPage() {
             <div className="flex items-center justify-between gap-3">
               <span className="text-sm text-zinc-600">{t.keys.file_none}</span>
               <button
-                onClick={() => fileRef.current?.click()}
+                onClick={handleFileChange}
                 disabled={uploading}
                 className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-zinc-800 hover:bg-zinc-700 disabled:opacity-40 rounded-lg text-zinc-300 transition-colors"
               >
@@ -225,14 +224,6 @@ export function KeyDetailPage() {
               </button>
             </div>
           )}
-
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".p12,.pfx"
-            className="hidden"
-            onChange={handleFileChange}
-          />
         </div>
       )}
 

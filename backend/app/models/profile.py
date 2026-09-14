@@ -1,7 +1,7 @@
 import uuid
 from datetime import date
 
-from sqlalchemy import Date, String, Text, text
+from sqlalchemy import Boolean, true, Date, String, Text, text
 from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -19,5 +19,7 @@ class Profile(Base, TimestampMixin):
     birth_date: Mapped[date | None] = mapped_column(Date)
     phone: Mapped[str | None] = mapped_column(String(32))
     address: Mapped[str | None] = mapped_column(Text)
+    addresses_match: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=true(), default=True)
+    residential_address: Mapped[str | None] = mapped_column(Text)
     note: Mapped[str | None] = mapped_column(Text)
     tags: Mapped[list] = mapped_column(JSON, nullable=False, server_default=text("'[]'"))

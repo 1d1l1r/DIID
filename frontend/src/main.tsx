@@ -5,14 +5,16 @@ import { Toaster } from 'react-hot-toast'
 import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router'
 import { queryClient } from './lib/query-client'
-import { PrivacyScreen } from './components/common/PrivacyScreen'
+import { installPrivacyLifecycle } from './lib/privacy'
 import './styles/index.css'
+
+const removePrivacyLifecycle = installPrivacyLifecycle()
+if (import.meta.hot) import.meta.hot.dispose(removePrivacyLifecycle)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-      <PrivacyScreen />
       <Toaster
         position="bottom-right"
         toastOptions={{

@@ -1,3 +1,4 @@
+import { pickFile } from '../../lib/pickFile'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -71,8 +72,8 @@ export function DocumentDetailPage() {
     },
   })
 
-  const handleUploadFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+  const handleUploadFile = async () => {
+    const file = await pickFile('application/pdf,image/jpeg,image/png')
     if (!file) return
     const ACCEPTED = ['application/pdf', 'image/jpeg', 'image/png']
     if (!ACCEPTED.includes(file.type)) {
@@ -405,16 +406,9 @@ export function DocumentDetailPage() {
               ) : (
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-zinc-600">{t.documents.file_none}</span>
-                  <label className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer">
+                  <button onClick={handleUploadFile} disabled={uploadingFile} className="flex items-center gap-1 text-xs text-indigo-400 hover:text-indigo-300 transition-colors cursor-pointer">
                     <Upload size={13} /> {uploadingFile ? t.documents.file_uploading : t.documents.file_upload}
-                    <input
-                      type="file"
-                      accept="application/pdf,image/jpeg,image/png"
-                      className="hidden"
-                      onChange={handleUploadFile}
-                      disabled={uploadingFile}
-                    />
-                  </label>
+                  </button>
                 </div>
               )}
             </div>
