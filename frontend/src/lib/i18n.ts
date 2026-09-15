@@ -369,6 +369,17 @@ const en = {
 
   // Users management
   users: {
+    edit: "Edit",
+    name: "Name",
+    reset_password: "New password (optional)",
+    password_hint: "Leave blank to keep the password. Changing it signs the user out on every device.",
+    ok_saved: "User updated",
+    err_save: "Could not update user",
+    err_load: "Could not load users",
+    conflict: "This name or password is already in use",
+    delete_member: "Delete this account and all its vault records and attachments? This cannot be undone:",
+    private_vaults: "Each account has its own private vault.",
+
     title: 'Users',
     label: 'Users',
     desc: 'Manage vault access',
@@ -382,7 +393,7 @@ const en = {
     err_add: 'Failed to add user',
     limit: 'User limit reached (9)',
     delete_account: 'Delete My Account',
-    confirm_delete: 'Delete your account? This cannot be undone.',
+    confirm_delete: 'Delete your account and all its vault records and attachments? This cannot be undone.',
     ok_deleted: 'Account deleted',
     err_delete: 'Failed to delete account',
   },
@@ -753,6 +764,17 @@ const ru: typeof en = {
   },
 
   users: {
+    edit: "Редактировать",
+    name: "Имя",
+    reset_password: "Новый пароль (необязательно)",
+    password_hint: "Оставьте пустым, чтобы сохранить пароль. Смена пароля завершит все сеансы пользователя.",
+    ok_saved: "Пользователь обновлён",
+    err_save: "Не удалось обновить пользователя",
+    err_load: "Не удалось загрузить пользователей",
+    conflict: "Такое имя или пароль уже используется",
+    delete_member: "Удалить аккаунт и все его записи и вложения? Это нельзя отменить:",
+    private_vaults: "У каждого пользователя своё отдельное хранилище.",
+
     title: 'Пользователи',
     label: 'Пользователи',
     desc: 'Управление доступом к хранилищу',
@@ -766,7 +788,7 @@ const ru: typeof en = {
     err_add: 'Не удалось добавить пользователя',
     limit: 'Достигнут лимит пользователей (9)',
     delete_account: 'Удалить мой аккаунт',
-    confirm_delete: 'Удалить свой аккаунт? Это нельзя отменить.',
+    confirm_delete: 'Удалить свой аккаунт и все его записи и вложения? Это нельзя отменить.',
     ok_deleted: 'Аккаунт удалён',
     err_delete: 'Не удалось удалить аккаунт',
   },
@@ -1135,6 +1157,17 @@ const kk: typeof en = {
   },
 
   users: {
+    edit: "Өңдеу",
+    name: "Аты",
+    reset_password: "Жаңа құпия сөз (міндетті емес)",
+    password_hint: "Құпия сөзді сақтау үшін бос қалдырыңыз. Өзгерткенде барлық сеанстар аяқталады.",
+    ok_saved: "Пайдаланушы жаңартылды",
+    err_save: "Пайдаланушыны жаңарту мүмкін болмады",
+    err_load: "Пайдаланушылар жүктелмеді",
+    conflict: "Бұл ат немесе құпия сөз қолданылуда",
+    delete_member: "Аккаунтты және оның барлық деректері мен файлдарын жою керек пе? Қайтару мүмкін емес:",
+    private_vaults: "Әр пайдаланушының жеке қоймасы бар.",
+
     title: 'Пайдаланушылар',
     label: 'Пайдаланушылар',
     desc: 'Қоймаға қол жеткізуді басқару',
@@ -1148,7 +1181,7 @@ const kk: typeof en = {
     err_add: 'Пайдаланушыны қосу мүмкін болмады',
     limit: 'Пайдаланушылар шегіне жетті (9)',
     delete_account: 'Аккаунтымды жою',
-    confirm_delete: 'Аккаунтыңызды жою керек пе? Бұл әрекетті болдырмауға болмайды.',
+    confirm_delete: 'Аккаунтыңызды және оның барлық деректері мен файлдарын жою керек пе? Бұл әрекетті болдырмауға болмайды.',
     ok_deleted: 'Аккаунт жойылды',
     err_delete: 'Аккаунтты жою мүмкін болмады',
   },

@@ -106,7 +106,7 @@ export const usePinStore = create<PinState>()(
       },
     }),
     {
-      name: 'diid-pin',
+      name: 'diid-pin:anonymous',
       partialize: (state) => ({ pinHash: state.pinHash, decoyPinHash: state.decoyPinHash }),
       onRehydrateStorage: () => (state) => {
         if (state?.pinHash) state.isLocked = true

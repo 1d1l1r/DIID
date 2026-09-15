@@ -26,6 +26,7 @@ async function setup(page: Page, pin = true) {
     if (path.includes('/images/')) return route.fulfill({ contentType: 'image/png', body: Buffer.from(png, 'base64') })
     let body: unknown = []
     if (path === '/auth/me') body = { id: 'user-1', username: 'admin', role: 'master' }
+    else if (path === '/auth/status') body = { initialized: true }
     else if (path === '/settings') body = { visibility: { preset: 'balanced', fields: {} } }
     else if (path === '/stashes/stash-1') body = stash
     else if (path === '/stashes') body = [stash]
@@ -196,5 +197,99 @@ test('a PIN hash completed after backgrounding cannot unlock the vault', async (
   await visibility(page, false)
   await page.evaluate(() => (window as unknown as { finishHash: () => void }).finishHash())
   await expect(page.getByText('Неверный PIN')).toBeVisible()
+  await expect(page.getByText('Private stash', { exact: true })).toHaveCount(0)
+})
+
+test('date input stays inside the mobile profile form', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await setup(page, false)
+  await page.goto('/profiles/person-1')
+  await page.locator('button').filter({ has: page.locator('svg.lucide-pencil') }).click()
+  const date = page.locator('input[type=date]')
+  await date.fill('2026-09-15')
+  const dateBox = await date.boundingBox()
+  const addressBox = await page.getByLabel('Адрес прописки', { exact: true }).boundingBox()
+  expect(dateBox!.x + dateBox!.width).toBeLessThanOrEqual(addressBox!.x + addressBox!.width + 1)
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390)
+  await page.screenshot({ path: test.info().outputPath('profile-mobile.png'), fullPage: true })
+})
+
+test('master edits and deletes member with explicit confirmation', async ({ page }) => {
+  await setup(page, false)
+  let users = [{ id: 'user-1', username: 'admin', role: 'master' }, { id: 'user-2', username: 'member', role: 'member' }]
+  let edited: unknown = null
+  let deleted = false
+  await page.route('**/api/v1/auth/users*', r => r.fulfill({ json: users }))
+  await page.route('**/api/v1/auth/users/user-2', async r => {
+    if (r.request().method() === 'PATCH') {
+      edited = r.request().postDataJSON()
+      users[1].username = r.request().postDataJSON().username
+      await r.fulfill({ json: users[1] })
+    } else { deleted = true; users = users.slice(0, 1); await r.fulfill({ status: 204 }) }
+  })
+  await page.goto('/settings/users')
+  await expect(page.getByRole('article', { name: 'admin' }).getByRole('button')).toHaveCount(0)
+  await page.getByRole('article', { name: 'member', exact: true }).getByRole('button', { name: 'Редактировать' }).click()
+  await page.getByLabel('Имя', { exact: true }).fill('Member renamed')
+  await page.getByLabel('Новый пароль (необязательно)').fill('new-test-password')
+  await page.getByRole('button', { name: 'Сохранить', exact: true }).click()
+  await expect(page.getByRole('article', { name: 'Member renamed', exact: true })).toBeVisible()
+  expect(edited).toEqual({ username: 'Member renamed', password: 'new-test-password' })
+  const member = page.getByRole('article', { name: 'Member renamed', exact: true })
+  await member.getByRole('button', { name: 'Удалить', exact: true }).click()
+  expect(deleted).toBe(false)
+  await expect(member).toContainText('все его записи и вложения')
+  await member.getByRole('button', { name: 'Отмена' }).click()
+  expect(deleted).toBe(false)
+  await member.getByRole('button', { name: 'Удалить', exact: true }).click()
+  await member.getByRole('button', { name: 'Удалить', exact: true }).click()
+  await expect(member).toHaveCount(0)
+  expect(deleted).toBe(true)
+})
+
+test('member has no account administration controls', async ({ page }) => {
+  await setup(page, false)
+  await page.route('**/api/v1/auth/me', r => r.fulfill({ json: { id: 'user-2', username: 'member', role: 'member' } }))
+  await page.goto('/settings/users')
+  await expect(page.getByRole('button', { name: 'Удалить мой аккаунт' })).toBeVisible()
+  await expect(page.getByPlaceholder('Пароль нового пользователя')).toHaveCount(0)
+  await expect(page.getByRole('button', { name: 'Редактировать' })).toHaveCount(0)
+})
+
+test('switching accounts clears vault cache and scopes PIN and local notes', async ({ page }) => {
+  await setup(page, false)
+  let active = { id: 'user-1', username: 'admin', role: 'master' }
+  await page.route('**/api/v1/auth/me', r => r.fulfill({ json: active }))
+  await page.route('**/api/v1/profiles', r => r.fulfill({ json: active.role === 'master' ? [profile] : [] }))
+  await page.goto('/profiles')
+  await expect(page.getByText('Person Test', { exact: true })).toBeVisible()
+  await page.evaluate(async () => {
+    const pinPath = '/src/features/pin/pinStore.ts'
+    const notesPath = '/src/features/pin/notesStore.ts'
+    const { usePinStore } = await import(pinPath)
+    const { useNotesStore } = await import(notesPath)
+    await usePinStore.getState().setPin('1234')
+    useNotesStore.getState().add('Master private note', 'Only for master')
+  })
+  await page.getByRole('button', { name: 'Выйти', exact: true }).click()
+  active = { id: 'user-2', username: 'member', role: 'member' }
+  await page.locator('input[autocomplete=current-password]').fill('member-test-password')
+  await page.locator('button[type=submit]').click()
+  await expect(page).not.toHaveURL(/login/)
+  await page.goto('/profiles')
+  await expect(page.getByText('Person Test', { exact: true })).toHaveCount(0)
+  await expect(page.getByRole('button', { name: '1', exact: true })).toHaveCount(0)
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('diid-pin:user-1')!).state.pinHash)).toBeTruthy()
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('diid-pin:user-2')!).state.pinHash)).toBeNull()
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('diid-notes:user-2')!).state.notes)).toEqual([])
+})
+
+test('a different account logging in another tab closes the current vault', async ({ page }) => {
+  await openStash(page, false)
+  await page.evaluate(() => {
+    localStorage.setItem('diid-active-account', 'user-2')
+    window.dispatchEvent(new StorageEvent('storage', { key: 'diid-active-account', newValue: 'user-2' }))
+  })
+  await expect(page).toHaveURL(/login/)
   await expect(page.getByText('Private stash', { exact: true })).toHaveCount(0)
 })

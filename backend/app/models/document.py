@@ -6,7 +6,7 @@ from sqlalchemy import Column, Date, Enum as SAEnum, ForeignKey, String, Text
 from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, TimestampMixin, OwnedMixin
 
 
 class DocumentType(str, enum.Enum):
@@ -21,7 +21,7 @@ class DocumentType(str, enum.Enum):
     photo = "photo"
 
 
-class Document(Base, TimestampMixin):
+class Document(Base, TimestampMixin, OwnedMixin):
     __tablename__ = "documents"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)

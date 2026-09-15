@@ -1,3 +1,5 @@
+import { isAxiosError } from 'axios'
+import { useAuthStore } from '../../features/auth/authStore'
 import { useState } from 'react'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 import { authApi } from '../../lib/api/auth'
@@ -52,11 +54,10 @@ export function ChangePasswordPage() {
     try {
       await authApi.changePassword(current, next)
       toast.success(t.change_pwd.ok)
-      setCurrent(''); setNext(''); setConfirm('')
-    } catch (err: any) {
-      const status = err?.response?.status
-      const detail = err?.response?.data?.detail
-      console.error('[change-password]', status, detail, err)
+      useAuthStore.getState().logout()
+    } catch (err) {
+      const status = isAxiosError(err) ? err.response?.status : undefined
+      const detail = isAxiosError(err) ? err.response?.data?.detail : undefined
       if (status === 400 && detail === 'Current password is incorrect') {
         toast.error(t.change_pwd.err_wrong)
       } else if (status === 422) {

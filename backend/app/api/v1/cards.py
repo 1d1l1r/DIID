@@ -17,11 +17,11 @@ router = APIRouter(tags=["cards"])
 def list_cards(
     profile_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not profile_crud.get(db, profile_id):
+    if not profile_crud.get(db, profile_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Profile not found")
-    return card_crud.get_by_profile(db, profile_id)
+    return card_crud.get_by_profile(db, profile_id, owner_id=current.user_id)
 
 
 @router.post(
@@ -33,20 +33,20 @@ def create_card(
     profile_id: uuid.UUID,
     body: CardCreate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not profile_crud.get(db, profile_id):
+    if not profile_crud.get(db, profile_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Profile not found")
-    return card_crud.create_for_profile(db, profile_id=profile_id, obj_in=body)
+    return card_crud.create_for_profile(db, profile_id=profile_id, obj_in=body, owner_id=current.user_id)
 
 
 @router.get("/cards/{card_id}", response_model=CardOut)
 def get_card(
     card_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    card = card_crud.get(db, card_id)
+    card = card_crud.get(db, card_id, owner_id=current.user_id)
     if not card:
         raise HTTPException(status_code=404, detail="Card not found")
     return card
@@ -57,19 +57,19 @@ def update_card(
     card_id: uuid.UUID,
     body: CardUpdate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    card = card_crud.get(db, card_id)
+    card = card_crud.get(db, card_id, owner_id=current.user_id)
     if not card:
         raise HTTPException(status_code=404, detail="Card not found")
-    return card_crud.update(db, db_obj=card, obj_in=body)
+    return card_crud.update(db, db_obj=card, obj_in=body, owner_id=current.user_id)
 
 
 @router.delete("/cards/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_card(
     card_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not card_crud.delete(db, id=card_id):
+    if not card_crud.delete(db, id=card_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Card not found")

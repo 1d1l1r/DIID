@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from fastapi import Cookie, Depends, HTTPException, status
+from fastapi import Cookie, Header, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.security import hash_token
@@ -11,6 +11,7 @@ from app.models.user import User
 
 def get_current_session(
     vault_session: str | None = Cookie(default=None),
+    x_vault_user: str | None = Header(default=None),
     db: Session = Depends(get_db),
 ) -> DBSession:
     if not vault_session:
@@ -25,6 +26,10 @@ def get_current_session(
         db.commit()
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Session expired")
 
+    if not db.get(User, session.user_id):
+        raise HTTPException(status_code=401, detail="User not found")
+    if x_vault_user is not None and x_vault_user != str(session.user_id):
+        raise HTTPException(status_code=401, detail="Account changed; sign in again")
     session.last_seen_at = datetime.now(timezone.utc)
     db.commit()
     return session

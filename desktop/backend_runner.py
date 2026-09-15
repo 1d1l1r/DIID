@@ -124,6 +124,9 @@ def init_db():
     # create_all does not add columns to an existing desktop vault.
     from app.db.desktop_migrations import upgrade_profile_addresses
     upgrade_profile_addresses(engine)
+    from app.db.ownership_v1 import upgrade_ownership
+    with engine.begin() as connection:
+        upgrade_ownership(connection)
 
 # ── Serve frontend (desktop mode) ────────────────────────────────────────────
 

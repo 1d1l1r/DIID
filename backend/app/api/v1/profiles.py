@@ -17,12 +17,12 @@ def list_profiles(
     q: str | None = Query(default=None),
     tags: list[str] = Query(default=[]),
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    profiles = profile_crud.get_list(db, q=q, tags=tags)
+    profiles = profile_crud.get_list(db, q=q, tags=tags, owner_id=current.user_id)
     result = []
     for p in profiles:
-        counts = profile_crud.get_counts(db, p.id)
+        counts = profile_crud.get_counts(db, p.id, owner_id=current.user_id)
         result.append(
             ProfileListItem(
                 id=p.id,
@@ -42,18 +42,18 @@ def list_profiles(
 def create_profile(
     body: ProfileCreate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    return profile_crud.create(db, obj_in=body)
+    return profile_crud.create(db, obj_in=body, owner_id=current.user_id)
 
 
 @router.get("/{profile_id}", response_model=ProfileOut)
 def get_profile(
     profile_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    profile = profile_crud.get(db, profile_id)
+    profile = profile_crud.get(db, profile_id, owner_id=current.user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
     return profile
@@ -64,19 +64,19 @@ def update_profile(
     profile_id: uuid.UUID,
     body: ProfileUpdate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    profile = profile_crud.get(db, profile_id)
+    profile = profile_crud.get(db, profile_id, owner_id=current.user_id)
     if not profile:
         raise HTTPException(status_code=404, detail="Profile not found")
-    return profile_crud.update(db, db_obj=profile, obj_in=body)
+    return profile_crud.update(db, db_obj=profile, obj_in=body, owner_id=current.user_id)
 
 
 @router.delete("/{profile_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_profile(
     profile_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not profile_crud.delete(db, id=profile_id):
+    if not profile_crud.delete(db, id=profile_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Profile not found")

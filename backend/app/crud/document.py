@@ -8,13 +8,13 @@ from app.schemas.document import DocumentCreate, DocumentUpdate
 
 
 class CRUDDocument(CRUDBase[Document, DocumentCreate, DocumentUpdate]):
-    def get_by_profile(self, db: Session, profile_id: uuid.UUID) -> list[Document]:
-        return db.query(Document).filter(Document.profile_id == profile_id).all()
+    def get_by_profile(self, db: Session, profile_id: uuid.UUID, *, owner_id: uuid.UUID) -> list[Document]:
+        return db.query(Document).filter(Document.profile_id == profile_id, Document.owner_id == owner_id).all()
 
     def create_for_profile(
-        self, db: Session, *, profile_id: uuid.UUID, obj_in: DocumentCreate
+        self, db: Session, *, profile_id: uuid.UUID, obj_in: DocumentCreate, owner_id: uuid.UUID
     ) -> Document:
-        doc = Document(profile_id=profile_id, **obj_in.model_dump())
+        doc = Document(owner_id=owner_id, profile_id=profile_id, **obj_in.model_dump())
         db.add(doc)
         db.commit()
         db.refresh(doc)

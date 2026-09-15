@@ -19,7 +19,7 @@ A self-hosted, encrypted vault for storing family documents, bank cards, passwor
 - **Decoy PIN** — enter a separate PIN to show a sanitised "nothing to see here" view
 - **Field visibility** — per-field control: always visible / tap to reveal / confirm to reveal
 - **Search** — instant full-text search across all records
-- **Multi-user** — master user creates up to 8 additional accounts; login by password only (no usernames); members can delete their own account
+- **Multi-user** — private vault per account; master creates, renames, resets passwords and deletes members; login by password only; members can delete their own account
 - **EN / RU / KK** — full interface localization (English, Russian, Kazakh) with persistent preference
 - **Privacy screen** — synchronously covers backgrounded pages and closes sensitive views; iOS app-switcher snapshots remain best-effort in a PWA
 - **Sessions** — view and revoke active login sessions
@@ -177,3 +177,5 @@ MIT
 ## Privacy, routes and profile addresses
 
 Stash details now include opt-in walking/car routes with live foreground location. Profiles support registered and residential addresses with a “same address” checkbox. Background locking closes image viewers and requires PIN again. See [implementation notes, migration steps and iPhone limitations](docs/privacy-navigation-addresses.md).
+
+For updates from the formerly shared multi-user vault, read [private user vaults and the required ownership migration](docs/private-user-vaults.md) before deployment.

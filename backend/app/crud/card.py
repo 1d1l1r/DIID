@@ -8,22 +8,23 @@ from app.schemas.card import CardCreate, CardUpdate
 
 
 class CRUDCard(CRUDBase[Card, CardCreate, CardUpdate]):
-    def get_by_profile(self, db: Session, profile_id: uuid.UUID) -> list[Card]:
-        return db.query(Card).filter(Card.profile_id == profile_id).all()
+    def get_by_profile(self, db: Session, profile_id: uuid.UUID, *, owner_id: uuid.UUID) -> list[Card]:
+        return db.query(Card).filter(Card.profile_id == profile_id, Card.owner_id == owner_id).all()
 
     def create_for_profile(
-        self, db: Session, *, profile_id: uuid.UUID, obj_in: CardCreate
+        self, db: Session, *, profile_id: uuid.UUID, obj_in: CardCreate, owner_id: uuid.UUID
     ) -> Card:
         data = obj_in.model_dump()
         card_number = data.get("card_number")
         last_four = card_number[-4:] if card_number and len(card_number) >= 4 else None
-        card = Card(profile_id=profile_id, card_last_four=last_four, **data)
+        card = Card(owner_id=owner_id, profile_id=profile_id, card_last_four=last_four, **data)
         db.add(card)
         db.commit()
         db.refresh(card)
         return card
 
-    def update(self, db: Session, *, db_obj: Card, obj_in: CardUpdate) -> Card:
+    def update(self, db: Session, *, db_obj: Card, obj_in: CardUpdate, owner_id: uuid.UUID) -> Card:
+        self.require_owner(db_obj, owner_id)
         data = obj_in.model_dump(exclude_unset=True)
         if "card_number" in data and data["card_number"]:
             data["card_last_four"] = data["card_number"][-4:]

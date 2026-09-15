@@ -5,10 +5,10 @@ from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, Text, func
 from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, TimestampMixin, OwnedMixin
 
 
-class Stash(Base, TimestampMixin):
+class Stash(Base, TimestampMixin, OwnedMixin):
     __tablename__ = "stashes"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)

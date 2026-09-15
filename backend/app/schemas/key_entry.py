@@ -16,8 +16,7 @@ class KeyUpdate(BaseModel):
     name: str | None = None
     password: str | None = None
     note: str | None = None
-    file_name: str | None = None
-    file_path: str | None = None
+    model_config = {"extra": "forbid"}
 
 
 class KeyOut(BaseModel):

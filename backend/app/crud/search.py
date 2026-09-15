@@ -1,3 +1,4 @@
+import uuid
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
@@ -14,12 +15,12 @@ from app.schemas.search import (
 )
 
 
-def search_all(db: Session, q: str) -> SearchResults:
+def search_all(db: Session, q: str, *, owner_id: uuid.UUID) -> SearchResults:
     pattern = f"%{q}%"
     q_lower = q.lower()
 
     profiles = (
-        db.query(Profile)
+        db.query(Profile).filter(Profile.owner_id == owner_id)
         .filter(
             or_(
                 Profile.last_name.ilike(pattern),
@@ -34,7 +35,7 @@ def search_all(db: Session, q: str) -> SearchResults:
     )
 
     documents = (
-        db.query(Document)
+        db.query(Document).filter(Document.owner_id == owner_id)
         .filter(
             or_(
                 Document.document_number.ilike(pattern),
@@ -47,7 +48,7 @@ def search_all(db: Session, q: str) -> SearchResults:
     )
 
     cards = (
-        db.query(Card)
+        db.query(Card).filter(Card.owner_id == owner_id)
         .filter(
             or_(
                 Card.bank_name.ilike(pattern),
@@ -60,7 +61,7 @@ def search_all(db: Session, q: str) -> SearchResults:
     )
 
     passwords = (
-        db.query(PasswordEntry)
+        db.query(PasswordEntry).filter(PasswordEntry.owner_id == owner_id)
         .filter(
             or_(
                 PasswordEntry.title.ilike(pattern),

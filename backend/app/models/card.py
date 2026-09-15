@@ -5,10 +5,10 @@ from sqlalchemy import Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.encryption import EncryptedString
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, TimestampMixin, OwnedMixin
 
 
-class Card(Base, TimestampMixin):
+class Card(Base, TimestampMixin, OwnedMixin):
     __tablename__ = "cards"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)

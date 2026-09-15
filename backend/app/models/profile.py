@@ -5,10 +5,10 @@ from sqlalchemy import Boolean, true, Date, String, Text, text
 from sqlalchemy import JSON, Uuid
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.base import Base, TimestampMixin
+from app.db.base import Base, TimestampMixin, OwnedMixin
 
 
-class Profile(Base, TimestampMixin):
+class Profile(Base, TimestampMixin, OwnedMixin):
     __tablename__ = "profiles"
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)

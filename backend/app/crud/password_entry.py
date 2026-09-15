@@ -14,8 +14,9 @@ class CRUDPasswordEntry(CRUDBase[PasswordEntry, PasswordCreate, PasswordUpdate])
         profile_id: uuid.UUID | None = None,
         shared: bool | None = None,
         category: str | None = None,
+        *, owner_id: uuid.UUID,
     ) -> list[PasswordEntry]:
-        query = db.query(PasswordEntry)
+        query = db.query(PasswordEntry).filter(PasswordEntry.owner_id == owner_id)
         if profile_id is not None:
             query = query.filter(PasswordEntry.profile_id == profile_id)
         if shared is True:

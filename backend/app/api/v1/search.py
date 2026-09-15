@@ -14,6 +14,6 @@ router = APIRouter(prefix="/search", tags=["search"])
 def search(
     q: str = Query(..., min_length=2),
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    return search_all(db, q)
+    return search_all(db, q, owner_id=current.user_id)

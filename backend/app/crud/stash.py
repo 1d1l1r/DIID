@@ -8,17 +8,17 @@ from app.schemas.stash import StashCreate, StashUpdate
 
 
 class CRUDStash(CRUDBase[Stash, StashCreate, StashUpdate]):
-    def get_list(self, db: Session) -> list[Stash]:
+    def get_list(self, db: Session, *, owner_id: uuid.UUID) -> list[Stash]:
         return (
-            db.query(Stash)
+            db.query(Stash).filter(Stash.owner_id == owner_id)
             .options(selectinload(Stash.images))
             .order_by(Stash.created_at.desc())
             .all()
         )
 
-    def get_with_images(self, db: Session, stash_id: uuid.UUID) -> Stash | None:
+    def get_with_images(self, db: Session, stash_id: uuid.UUID, *, owner_id: uuid.UUID) -> Stash | None:
         return (
-            db.query(Stash)
+            db.query(Stash).filter(Stash.owner_id == owner_id)
             .options(selectinload(Stash.images))
             .filter(Stash.id == stash_id)
             .first()
@@ -46,8 +46,8 @@ class CRUDStash(CRUDBase[Stash, StashCreate, StashUpdate]):
         db.refresh(img)
         return img
 
-    def get_image(self, db: Session, image_id: uuid.UUID) -> StashImage | None:
-        return db.query(StashImage).filter(StashImage.id == image_id).first()
+    def get_image(self, db: Session, image_id: uuid.UUID, *, owner_id: uuid.UUID) -> StashImage | None:
+        return db.query(StashImage).join(Stash).filter(StashImage.id == image_id, Stash.owner_id == owner_id).first()
 
     def delete_image(self, db: Session, image: StashImage) -> None:
         db.delete(image)

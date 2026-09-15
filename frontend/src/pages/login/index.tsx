@@ -58,8 +58,8 @@ export function LoginPage() {
         </div>
 
         {initialized
-          ? <LoginForm t={t} onSuccess={async () => {
-              const user = await authApi.me()
+          ? <LoginForm t={t} onSuccess={async (expectedUserId) => {
+              const user = await authApi.me(expectedUserId)
               setUser(user)
               navigate('/')
             }} />
@@ -86,7 +86,7 @@ export function LoginPage() {
 }
 
 // ── Login ────────────────────────────────────────────────────────────────────
-function LoginForm({ t, onSuccess }: { t: ReturnType<typeof useT>; onSuccess: () => Promise<void> }) {
+function LoginForm({ t, onSuccess }: { t: ReturnType<typeof useT>; onSuccess: (expectedUserId: string) => Promise<void> }) {
   const [password, setPassword] = useState('')
   const [show, setShow] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -96,8 +96,8 @@ function LoginForm({ t, onSuccess }: { t: ReturnType<typeof useT>; onSuccess: ()
     if (!password) return
     setLoading(true)
     try {
-      await authApi.login(password)
-      await onSuccess()
+      const session = await authApi.login(password)
+      await onSuccess(session.user_id)
     } catch {
       toast.error(t.auth.err_wrong)
     } finally {

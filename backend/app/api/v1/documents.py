@@ -24,11 +24,11 @@ router = APIRouter(tags=["documents"])
 def list_documents(
     profile_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not profile_crud.get(db, profile_id):
+    if not profile_crud.get(db, profile_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Profile not found")
-    return document_crud.get_by_profile(db, profile_id)
+    return document_crud.get_by_profile(db, profile_id, owner_id=current.user_id)
 
 
 @router.post(
@@ -40,20 +40,20 @@ def create_document(
     profile_id: uuid.UUID,
     body: DocumentCreate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not profile_crud.get(db, profile_id):
+    if not profile_crud.get(db, profile_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Profile not found")
-    return document_crud.create_for_profile(db, profile_id=profile_id, obj_in=body)
+    return document_crud.create_for_profile(db, profile_id=profile_id, obj_in=body, owner_id=current.user_id)
 
 
 @router.get("/documents/{document_id}", response_model=DocumentOut)
 def get_document(
     document_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    doc = document_crud.get(db, document_id)
+    doc = document_crud.get(db, document_id, owner_id=current.user_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     return doc
@@ -64,21 +64,21 @@ def update_document(
     document_id: uuid.UUID,
     body: DocumentUpdate,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    doc = document_crud.get(db, document_id)
+    doc = document_crud.get(db, document_id, owner_id=current.user_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
-    return document_crud.update(db, db_obj=doc, obj_in=body)
+    return document_crud.update(db, db_obj=doc, obj_in=body, owner_id=current.user_id)
 
 
 @router.delete("/documents/{document_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_document(
     document_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    if not document_crud.delete(db, id=document_id):
+    if not document_crud.delete(db, id=document_id, owner_id=current.user_id):
         raise HTTPException(status_code=404, detail="Document not found")
 
 
@@ -87,11 +87,11 @@ async def upload_file(
     document_id: uuid.UUID,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
     if file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="Only PDF, JPG, PNG files are allowed")
-    doc = document_crud.get(db, document_id)
+    doc = document_crud.get(db, document_id, owner_id=current.user_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
     if doc.file_path:
@@ -110,9 +110,9 @@ async def upload_file(
 def download_file(
     document_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    doc = document_crud.get(db, document_id)
+    doc = document_crud.get(db, document_id, owner_id=current.user_id)
     if not doc or not doc.file_path:
         raise HTTPException(status_code=404, detail="File not found")
     ext = Path(doc.file_path).suffix.lower()
@@ -125,9 +125,9 @@ def download_file(
 def delete_file(
     document_id: uuid.UUID,
     db: Session = Depends(get_db),
-    _: DBSession = Depends(get_current_session),
+    current: DBSession = Depends(get_current_session),
 ):
-    doc = document_crud.get(db, document_id)
+    doc = document_crud.get(db, document_id, owner_id=current.user_id)
     if not doc or not doc.file_path:
         raise HTTPException(status_code=404, detail="File not found")
     Path(doc.file_path).unlink(missing_ok=True)

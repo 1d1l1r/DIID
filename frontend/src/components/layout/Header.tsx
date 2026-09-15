@@ -34,15 +34,15 @@ export function Header() {
         {/* Search trigger */}
         <button
           onClick={() => setSearchOpen(true)}
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors text-sm w-52 md:w-72"
+          className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700 transition-colors text-sm min-w-0 flex-1 max-w-52 md:max-w-72"
         >
           <Search size={14} />
-          <span className="flex-1 text-left">{t.common.search_placeholder}</span>
+          <span className="flex-1 text-left truncate">{t.common.search_placeholder}</span>
           <kbd className="text-xs border border-zinc-700 rounded px-1 py-0.5 hidden sm:inline">⌘K</kbd>
         </button>
 
         {/* Actions */}
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           {/* Home — mobile only */}
           <button
             onClick={() => navigate('/')}
@@ -74,6 +74,7 @@ export function Header() {
           {/* Logout */}
           <button
             onClick={handleLogout}
+            aria-label={t.common.sign_out}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800 transition-colors text-sm"
           >
             <LogOut size={15} />

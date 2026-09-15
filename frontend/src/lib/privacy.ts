@@ -1,6 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { flushSync } from 'react-dom'
 import { usePinStore } from '../features/pin/pinStore'
+import { checkAccountChanged } from '../features/auth/authStore'
 
 let concealed = false
 const listeners = new Set<() => void>()
@@ -24,6 +25,7 @@ export function installPrivacyLifecycle() {
   const reveal = () => {
     if (document.hidden) return
     flushSync(() => {
+      checkAccountChanged()
       concealed = false
       listeners.forEach(listener => listener())
     })

@@ -2,7 +2,7 @@ import os
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 
 # Set required env vars before importing any app modules
@@ -17,6 +17,11 @@ from app.main import app  # noqa: E402
 SQLALCHEMY_TEST_URL = "sqlite:///./test.db"
 
 engine = create_engine(SQLALCHEMY_TEST_URL, connect_args={"check_same_thread": False})
+@event.listens_for(engine, "connect")
+def enable_test_foreign_keys(connection, _):
+    connection.execute("PRAGMA foreign_keys=ON")
+
+
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
@@ -31,7 +36,9 @@ def setup_db():
 def db():
     connection = engine.connect()
     transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
+    # Keep endpoint commits/rollbacks inside the test transaction, including conflicts.
+    connection.exec_driver_sql("BEGIN")
+    session = TestingSessionLocal(bind=connection, join_transaction_mode="create_savepoint")
     try:
         yield session
     finally:

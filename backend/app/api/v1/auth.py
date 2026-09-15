@@ -4,6 +4,8 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import update
+from sqlalchemy.exc import IntegrityError
+from app.crud.user import delete_user_vault
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_session, get_current_user, require_master
@@ -15,7 +17,7 @@ from app.models.user import User
 from app.models.user_settings import UserSettings, DEFAULT_VISIBILITY
 from app.schemas.auth import (
     ChangePasswordRequest, CreateUserRequest, LoginRequest,
-    MeOut, SessionOut, SetupRequest, UserListItem,
+    MeOut, SessionOut, SetupRequest, UserListItem, UpdateUserRequest,
 )
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -60,8 +62,11 @@ def login(
     matched_user: User | None = None
     for u in users:
         if verify_password(body.password, u.hashed_password):
+            if matched_user is not None:
+                # Old versions allowed duplicate passwords through self-service
+                # changes. Never choose an arbitrary account in that situation.
+                raise HTTPException(status_code=401, detail="Ambiguous password; ask the master to reset it")
             matched_user = u
-            break
 
     if not matched_user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid password")
@@ -89,7 +94,7 @@ def login(
         samesite="strict",
         max_age=settings.session_expire_days * 86400,
     )
-    return {"session_id": str(session.id), "expires_at": session.expires_at}
+    return {"session_id": str(session.id), "user_id": str(matched_user.id), "expires_at": session.expires_at}
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
@@ -167,9 +172,8 @@ def delete_me(
     """Member deletes their own account. Master cannot delete themselves."""
     if current_user.role == "master":
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Master cannot delete themselves")
-    # Sessions are cascade-deleted via FK ondelete="CASCADE"
-    db.delete(current_user)
-    db.commit()
+    delete_user_vault(db, current_user)
+
 
 
 @router.get("/sessions", response_model=list[SessionOut])
@@ -200,13 +204,19 @@ def change_password(
     if not verify_password(body.current_password, current_user.hashed_password):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Current password is incorrect")
 
+    for other in db.query(User).filter(User.id != current_user.id):
+        if verify_password(body.new_password, other.hashed_password):
+            raise HTTPException(status_code=409, detail="Password already in use by another account")
+    db.query(DBSession).filter(DBSession.user_id == current_user.id).delete(synchronize_session=False)
     db.execute(
         update(User)
         .where(User.id == current_user.id)
         .values(hashed_password=hash_password(body.new_password))
     )
     db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    response = Response(status_code=status.HTTP_204_NO_CONTENT)
+    response.delete_cookie("vault_session")
+    return response
 
 
 @router.delete("/sessions/{session_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -224,3 +234,46 @@ def revoke_session(
         raise HTTPException(status_code=404, detail="Session not found")
     db.delete(session)
     db.commit()
+
+
+@router.patch("/users/{user_id}", response_model=UserListItem)
+def update_user(
+    user_id: uuid.UUID,
+    body: UpdateUserRequest,
+    _master: User = Depends(require_master),
+    db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.role == "master":
+        raise HTTPException(status_code=403, detail="Use your own account settings for the master")
+    if body.password is not None:
+        for other in db.query(User).filter(User.id != user_id):
+            if verify_password(body.password, other.hashed_password):
+                raise HTTPException(status_code=409, detail="Password already in use by another account")
+        user.hashed_password = hash_password(body.password)
+        db.query(DBSession).filter(DBSession.user_id == user_id).delete(synchronize_session=False)
+    if body.username is not None:
+        user.username = body.username
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Username already in use")
+    db.refresh(user)
+    return user
+
+
+@router.delete("/users/{user_id}", status_code=204)
+def delete_user(
+    user_id: uuid.UUID,
+    _master: User = Depends(require_master),
+    db: Session = Depends(get_db),
+):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    if user.role == "master":
+        raise HTTPException(status_code=403, detail="Master cannot be deleted")
+    delete_user_vault(db, user)

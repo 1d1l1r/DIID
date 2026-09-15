@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 
 UserRole = Literal["master", "member"]
 
@@ -72,3 +72,16 @@ class UserListItem(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class UpdateUserRequest(BaseModel):
+    username: str | None = Field(default=None, min_length=1, max_length=64)
+    password: str | None = Field(default=None, min_length=8)
+    model_config = {"extra": "forbid"}
+
+    @field_validator('username')
+    @classmethod
+    def nonblank_name(cls, value):
+        if value is not None and not value.strip():
+            raise ValueError('Username cannot be blank')
+        return value.strip() if value is not None else None

@@ -7,8 +7,14 @@ from app.main import app
 
 
 @pytest.fixture
-def authenticated_client(client):
-    app.dependency_overrides[get_current_session] = lambda: object()
+def authenticated_client(client, db):
+    import uuid
+    from types import SimpleNamespace
+    from app.models.user import User
+    user = User(id=uuid.uuid4(), username='address-test', hashed_password='unused', role='master')
+    db.add(user)
+    db.commit()
+    app.dependency_overrides[get_current_session] = lambda: SimpleNamespace(user_id=user.id)
     yield client
     app.dependency_overrides.pop(get_current_session, None)
 

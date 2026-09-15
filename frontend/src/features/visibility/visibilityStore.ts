@@ -22,5 +22,5 @@ interface VisibilityState {
 export const useVisibilityStore = create<VisibilityState>((set, get) => ({
   config: DEFAULT,
   setConfig: (config) => set({ config }),
-  getMode: (field) => get().config.fields[field] ?? 'visible',
+  getMode: (field) => get().config.fields[field] ?? (get().config.preset === 'all_hidden' ? 'hidden_confirmed' : 'visible'),
 }))

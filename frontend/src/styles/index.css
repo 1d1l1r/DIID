@@ -19,6 +19,18 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Safari's native date control otherwise keeps an intrinsic width inside grids. */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+  min-height: 2.5rem;
+}
+input[type="date"]::-webkit-date-and-time-value { text-align: left; min-height: 1.25em; }
+
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;

@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 import type { User } from '../../lib/types'
+import { queryClient } from '../../lib/query-client'
+import { selectAccountState } from './accountState'
 
 interface AuthState {
   user: User | null
@@ -9,10 +11,31 @@ interface AuthState {
   logout: () => void
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   loading: true,
-  setUser: (user) => set({ user, loading: false }),
+  setUser: (user) => {
+    if (get().user?.id !== user?.id) {
+      queryClient.clear()
+      selectAccountState(user)
+    }
+    set({ user, loading: false })
+    localStorage.setItem('diid-active-account', user?.id ?? '')
+  },
   setLoading: (loading) => set({ loading }),
-  logout: () => set({ user: null, loading: false }),
+  logout: () => get().setUser(null),
 }))
+
+export function checkAccountChanged() {
+  const current = useAuthStore.getState().user
+  const active = localStorage.getItem('diid-active-account')
+  if (current && active !== null && active !== current.id) {
+    queryClient.clear()
+    selectAccountState(null)
+    useAuthStore.setState({ user: null, loading: false })
+  }
+}
+
+window.addEventListener('storage', event => {
+  if (event.key === 'diid-active-account') checkAccountChanged()
+})

@@ -37,6 +37,6 @@ export const useNotesStore = create<NotesState>()(
 
       remove: (id) => set(s => ({ notes: s.notes.filter(n => n.id !== id) })),
     }),
-    { name: 'diid-notes' },
+    { name: 'diid-notes:anonymous' },
   ),
 )

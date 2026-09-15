@@ -7,10 +7,15 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading, setUser } = useAuthStore()
 
   useEffect(() => {
-    if (loading) {
-      authApi.me().then(setUser).catch(() => setUser(null))
+    let active = true
+    const finish = (next: Parameters<typeof setUser>[0]) => {
+      if (active && useAuthStore.getState().loading) setUser(next)
     }
-  }, []) // eslint-disable-line
+    if (loading) {
+      authApi.me().then(finish).catch(() => finish(null))
+    }
+    return () => { active = false }
+  }, [loading, setUser])
 
   if (loading) {
     return (
