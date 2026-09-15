@@ -1,21 +1,8 @@
-import { useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
-import { authApi } from '../../lib/api/auth'
 import { useAuthStore } from './authStore'
 
 export function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user, loading, setUser } = useAuthStore()
-
-  useEffect(() => {
-    let active = true
-    const finish = (next: Parameters<typeof setUser>[0]) => {
-      if (active && useAuthStore.getState().loading) setUser(next)
-    }
-    if (loading) {
-      authApi.me().then(finish).catch(() => finish(null))
-    }
-    return () => { active = false }
-  }, [loading, setUser])
+  const { user, loading } = useAuthStore()
 
   if (loading) {
     return (

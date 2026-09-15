@@ -47,6 +47,9 @@ const en = {
 
   // Auth
   auth: {
+    session_unavailable: 'Could not verify your session. Check your connection and retry.',
+    retry_session: 'Retry',
+    restoring_session: 'Restoring session',
     subtitle_login: 'Enter master password to sign in',
     subtitle_setup: 'Create a master password for your vault',
     placeholder_password: 'Master password',
@@ -458,6 +461,9 @@ const ru: typeof en = {
 },
 
   auth: {
+    session_unavailable: 'Не удалось проверить сессию. Проверьте подключение и повторите попытку.',
+    retry_session: 'Повторить',
+    restoring_session: 'Восстанавливаем сессию',
     subtitle_login: 'Введите мастер-пароль для входа',
     subtitle_setup: 'Создайте мастер-пароль для хранилища',
     placeholder_password: 'Мастер-пароль',
@@ -851,6 +857,9 @@ const kk: typeof en = {
 },
 
   auth: {
+    session_unavailable: 'Сессияны тексеру мүмкін болмады. Байланысты тексеріп, қайталап көріңіз.',
+    retry_session: 'Қайталау',
+    restoring_session: 'Сессия қалпына келтірілуде',
     subtitle_login: 'Кіру үшін мастер-құпия сөзді енгізіңіз',
     subtitle_setup: 'Қойма үшін мастер-құпия сөз жасаңыз',
     placeholder_password: 'Мастер-құпия сөз',

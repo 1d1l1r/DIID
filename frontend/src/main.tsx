@@ -6,6 +6,7 @@ import { RouterProvider } from 'react-router-dom'
 import { router } from './app/router'
 import { queryClient } from './lib/query-client'
 import { installPrivacyLifecycle } from './lib/privacy'
+import { SessionBootstrap } from './features/auth/SessionBootstrap'
 import './styles/index.css'
 
 const removePrivacyLifecycle = installPrivacyLifecycle()
@@ -14,7 +15,7 @@ if (import.meta.hot) import.meta.hot.dispose(removePrivacyLifecycle)
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <SessionBootstrap><RouterProvider router={router} /></SessionBootstrap>
       <Toaster
         position="bottom-right"
         toastOptions={{

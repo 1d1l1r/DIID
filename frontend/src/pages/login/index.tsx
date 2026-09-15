@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Lock } from 'lucide-react'
 import { authApi } from '../../lib/api/auth'
 import { useAuthStore } from '../../features/auth/authStore'
@@ -12,15 +12,18 @@ const inputCls =
 export function LoginPage() {
   const [initialized, setInitialized] = useState<boolean | null>(null)
   const navigate = useNavigate()
-  const { setUser } = useAuthStore()
+  const { user, setUser } = useAuthStore()
   const t = useT()
   const { lang, setLang } = useLangStore()
 
   useEffect(() => {
+    if (user) return
     authApi.status()
       .then(s => setInitialized(s.initialized))
       .catch(() => setInitialized(true))
-  }, [])
+  }, [user])
+
+  if (user) return <Navigate to="/" replace />
 
   if (initialized === null) {
     return (

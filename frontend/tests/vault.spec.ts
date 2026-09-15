@@ -293,3 +293,61 @@ test('a different account logging in another tab closes the current vault', asyn
   await expect(page).toHaveURL(/login/)
   await expect(page.getByText('Private stash', { exact: true })).toHaveCount(0)
 })
+
+
+test('saved login launch URL restores a valid session to the PIN screen', async ({ page }) => {
+  await setup(page)
+  await page.goto('/login')
+  await expect(page.getByRole('button', { name: '1', exact: true })).toBeVisible()
+  await expect(page.locator('input[autocomplete="current-password"]')).toHaveCount(0)
+  await expect(page).toHaveURL('/')
+})
+
+test('closing and reopening a page retains the account PIN and relocks', async ({ page, context }) => {
+  await openStash(page)
+  const savedPin = await page.evaluate(() => localStorage.getItem('diid-pin:user-1'))
+  await page.close()
+  const reopened = await context.newPage()
+  await setup(reopened, false)
+  await reopened.goto('/login')
+  await expect(reopened.getByRole('button', { name: '1', exact: true })).toBeVisible()
+  expect(await reopened.evaluate(() => localStorage.getItem('diid-pin:user-1'))).toBe(savedPin)
+  await expect(reopened.locator('input[autocomplete="current-password"]')).toHaveCount(0)
+  await enterPin(reopened)
+  await reopened.goto('/stashes/stash-1')
+  await expect(reopened.getByRole('button', { name: '1', exact: true })).toBeVisible()
+  await enterPin(reopened)
+  await expect(reopened.getByText('Private stash', { exact: true })).toBeVisible()
+})
+
+for (const failure of ['network', 'server']) {
+  test(`startup ${failure} failure retries without logging out or exposing the vault`, async ({ page }) => {
+    await setup(page)
+    let unavailable = true
+    await page.route('**/api/v1/auth/me', route => {
+      if (unavailable) return failure === 'network' ? route.abort('failed') : route.fulfill({ status: 503 })
+      return route.fulfill({ json: { id: 'user-1', username: 'admin', role: 'master' } })
+    })
+    await page.goto('/stashes/stash-1')
+    await expect(page.getByRole('alert')).toContainText('Не удалось проверить сессию')
+    await expect(page).not.toHaveURL(/login/)
+    await expect(page.locator('input[autocomplete="current-password"]')).toHaveCount(0)
+    await expect(page.getByText('Private stash', { exact: true })).toHaveCount(0)
+    unavailable = false
+    if (failure === 'network') await page.evaluate(() => window.dispatchEvent(new Event('online')))
+    else await page.getByRole('button', { name: 'Повторить', exact: true }).click()
+    await expect(page.getByRole('button', { name: '1', exact: true })).toBeVisible()
+    await enterPin(page)
+    await expect(page.getByText('Private stash', { exact: true })).toBeVisible()
+  })
+}
+
+test('an expired session requires the account password even when a PIN is saved', async ({ page }) => {
+  await setup(page)
+  await page.route('**/api/v1/auth/me', route => route.fulfill({ status: 401, json: { detail: 'Session expired' } }))
+  await page.goto('/stashes/stash-1')
+  await expect(page).toHaveURL(/login/)
+  await expect(page.locator('input[autocomplete="current-password"]')).toBeVisible()
+  await expect(page.getByRole('button', { name: '1', exact: true })).toHaveCount(0)
+  await expect(page.getByText('Private stash', { exact: true })).toHaveCount(0)
+})
