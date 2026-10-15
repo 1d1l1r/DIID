@@ -13,9 +13,25 @@ interface PasswordItemProps {
 export function PasswordItem({ entry, onClick }: PasswordItemProps) {
   const { getMode } = useVisibilityStore()
 
-  const favicon = entry.url
-    ? `https://www.google.com/s2/favicons?sz=32&domain=${new URL(entry.url).hostname}`
-    : null
+  const favicon = (() => {
+    const raw = entry.url?.trim()
+    if (!raw) return null
+
+    try {
+      const normalized = /^https?:\/\//i.test(raw)
+        ? raw
+        : `https://${raw}`
+
+      const parsed = new URL(normalized)
+      if (!['http:', 'https:'].includes(parsed.protocol) || !parsed.hostname) {
+        return null
+      }
+
+      return `https://www.google.com/s2/favicons?sz=32&domain=${encodeURIComponent(parsed.hostname)}`
+    } catch {
+      return null
+    }
+  })()
 
   return (
     <div
